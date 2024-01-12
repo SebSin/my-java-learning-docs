@@ -1,0 +1,1129 @@
+# Java Basic 80 Interview Questions (41 - 80)
+
+## 40. What are the similarities and differences between runtime exceptions and general exceptions?
+
+Exceptions represent abnormal conditions that may occur during program running. Runtime exceptions represent abnormalities that may be encountered in the normal operation of a virtual machine and are a common operating error. The Java compiler requires that methods must be declared to throw non-runtime exceptions that may occur, but it is not required to be declared to throw uncaught runtime exceptions.
+
+## 41.What is the difference between error and exception?
+
+error represents a serious problem in a situation where recovery is not impossible but difficult. For example, memory overflow. It is impossible to expect a program to handle such a situation. exception represents a design or implementation problem. That is, it represents a situation that would never occur if the program were running normally.
+
+## 42. Simple principles and applications of exception handling mechanism in Java.
+
+Exceptions refer to abnormal situations or errors that occur when a Java program is running (not compiled). They are very similar to events in real life. Events in real life can include information such as the time, place, character, plot, etc. of the event. Represented by an object, Java uses an object-oriented approach to handle exceptions. It encapsulates each exception that occurs in the program into an object to represent it, and the object contains exception information.
+
+Java classifies exceptions. Different types of exceptions are represented by different Java classes. The root class of all exceptions is java.lang.Throwable. Two subclasses are derived from Throwable: Error and Exception. Error means that the application itself cannot To overcome and recover from a serious problem, the program has no choice but to die, for example, system problems such as memory overflow and thread deadlock. Exceptions indicate problems that the program can overcome and recover from, which are divided into system exceptions and ordinary exceptions. System exceptions are problems caused by defects in the software itself, that is, problems caused by software developers' poor consideration, which cannot be overcome by software users. and recover this kind of problem, but in this kind of problem, the software system can still continue to run or the software can die, such as array script out of bounds (ArrayIndexOutOfBoundsException), NullPointerException (NullPointerException), class conversion exception (ClassCastException); common exceptions are Problems caused by changes or abnormalities in the operating environment are problems that users can overcome, such as network disconnection and insufficient hard disk space. After such an exception occurs, the program should not die.
+
+Java provides different solutions for system exceptions and ordinary exceptions. The compiler forces ordinary exceptions to be processed by try..catch or continued to be thrown to the upper-level calling method with a throws statement. Therefore, ordinary exceptions are also called checked exceptions, while system exceptions can It can be processed or not processed, so the compiler does not force try..catch processing or throws declaration, so system exceptions are also called unchecked exceptions.
+
+Tips for answerers: Think about it in three levels: errors where the virtual machine must crash, errors where the program may or may not die, errors where the program should not die;
+
+## 43. Please write down the 5 most common runtime exceptions you see.
+
+This question mainly tests how much code you have. If you have been writing code for a long time, you should have often seen some system exceptions. You don’t necessarily have to answer 5 specific system exceptions, but you need to be able to say Just tell what the system exception is and a few system exceptions. Of course, it is best to write these exceptions entirely in their English names. If you really can’t write them out, then use Chinese. It’s better than nothing!
+
+The so-called system exceptions are... They are all subclasses of RuntimeException. If you look up the RuntimeException class in the jdk doc, you can see a list of all its subclasses, that is, you can see all system exceptions. The system exceptions that I am more impressed with include: NullPointerException, ArrayIndexOutOfBoundsException, and ClassCastException.
+
+## 44. How many ways can you implement a thread in java? What keywords are used to modify synchronization methods? Why are the stop() and suspend() methods not recommended?
+
+Before java5, there were two types:
+
+The first: new Thread(){}.start(); This means calling the run method of the Thread subclass object. new Thread(){} means an instance object of an anonymous subclass of Thread. After the subclass adds the run method The code is as follows:
+
+```java
+new Thread(){
+	public void run(){
+	}
+}.start();
+```
+The second type:
+
+new Thread(new Runnable(){}).start(); This means calling the run method of the Runnable object accepted by the Thread object. new Runnable(){} means an instance object of an anonymous subclass of Runnable. The subclass of runnable is added The code after calling the run method is as follows:
+
+```java
+new Thread(new Runnable(){
+			public void run(){
+			}	
+		}
+	).start();
+```
+Starting from Java5, there are also the following ways to create multi-threads from thread pools:
+
+```java
+ExecutorService pool = Executors.newFixedThreadPool(3)
+for(int i=0;i<10;i++)
+{
+    pool.execute(new Runable(){public void run(){}});
+}
+Executors.newCachedThreadPool().execute(new Runable(){public void run(){}});
+Executors.newSingleThreadExecutor().execute(new Runable(){public void run(){}});
+```
+There are two implementation methods, using new Thread() and new Thread(runnable) respectively. The first method directly calls the run method of thread, so we often use Thread subclasses, namely new SubThread(). The second type calls the run method of runnable.
+
+There are two implementation methods, namely inheriting the Thread class and implementing the Runnable interface, and using the synchronized keyword to modify the synchronization method. The use of stop() is discouraged because it is unsafe. It releases all locks acquired by threads, and if the objects are in an incoherent state, other threads can inspect and modify them in that state. As a result it is difficult to detect the real problem. The suspend() method is prone to deadlock. When suspend() is called, the target thread will stop, but it still holds the lock obtained before. At this point, no other thread can access the locked resource unless the "suspended" thread resumes operation. For any thread, if they want to resume the target thread and try to use any locked resource at the same time, a deadlock will occur. So instead of using suspend(), you should put a flag in your Thread class to indicate whether the thread should be active or suspended. If the flag indicates that the thread should be suspended, use wait() to order it to enter the waiting state. If the flag indicates that the thread should be resumed, use a notify() to restart the thread.
+
+## 45.What is the difference between sleep() and wait()?
+
+Sleep is a method of the thread class (Thread), which causes this thread to pause execution for a specified time and give execution opportunities to other threads. However, the monitoring status is still maintained and will automatically resume after the time is up. Calling sleep does not release the object lock. wait is a method of the Object class. Calling the wait method on this object causes this thread to give up the object lock and enter the waiting lock pool waiting for this object. Only after the notify method (or notifyAll) is issued for this object, this thread enters the object lock pool and prepares to obtain it. The object lock enters the running state.
+
+Sleep means that the executing thread actively gives up the CPU, and the CPU goes to execute other threads. After the time specified by sleep, the CPU will return to this thread and continue execution. If the current thread enters the synchronization lock, the sleep method will not Release the lock. Even if the current thread uses the sleep method to give up the CPU, other threads blocked by the synchronization lock cannot be executed. Wait means to temporarily give up the synchronization lock in a thread that has entered the synchronization lock so that other threads waiting for the lock can obtain the synchronization lock and run. Only other threads call the notify method (notify does not release the lock). , it just tells the thread that has called the wait method to participate in the competition to obtain the lock, but it does not obtain the lock immediately, because the lock is still in the hands of others and has not been released by others. If there is a lot of code behind the notify method, these codes are needed The lock will be released after execution. You can add a wait and some code after the notfiy method to see the effect). The thread calling the wait method will release the wait state and the program can obtain the lock again and continue running downward. The explanation of wait must be explained with example code to make it appear that you really understand it.
+
+```java
+public class MultiThread {
+    public static void main(String[] args) {
+        new Thread(new Thread1()).start();
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        new Thread(new Thread2()).start();
+    }
+
+    private static class Thread1 implements Runnable {
+        @Override
+        public void run() {
+            //Since Thread1 here and the internal run method of Thread2 below need to use the same object as the monitor, we cannot use this here, because this in Thread2 and this in Thread1 are not the same object. We use the bytecode object MultiThread.class. When this variable is referenced in the current virtual machine, it points to the same object.
+            synchronized (MultiThread.class) {
+                System.out.println("enter thread1...");
+                System.out.println("thread1 is waiting");
+                try {
+                    //There are two ways to release the lock. The first way is that the program naturally leaves the scope of the monitor, that is, it leaves the scope of the code governed by the synchronized keyword. The other way is to call the monitor within the code governed by the synchronized keyword. The wait method of the object. Here, use the wait method to release the lock.
+                    MultiThread.class.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("thread1 is going on...");
+                System.out.println("thread1 is being over!");
+            }
+        }
+    }
+
+    private static class Thread2 implements Runnable {
+        @Override
+        public void run() {
+            synchronized (MultiThread.class) {
+                System.out.println("enter thread2...");
+                System.out.println("thread2 notify other thread can release wait status..");
+                //Since the notify method does not release the lock, even if thread2 calls the sleep method below and rests for 10 milliseconds, thread1 will still not execute because thread2 does not release the lock, so Thread1 cannot get the lock.
+                MultiThread.class.notify();
+                System.out.println("thread2 is sleeping ten millisecond...");
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("thread2 is going on...");
+                System.out.println("thread2 is being over!");
+            }
+        }
+    }
+}
+```
+## 46. What are the similarities and differences between synchronization and asynchronousness, and under what circumstances should they be used respectively? for example.
+
+If the data will be shared between threads. For example, the data being written may be read by another thread in the future, or the data being read may have been written by another thread, then these data are shared data and must be accessed synchronously.
+
+When an application calls a method on an object that takes a long time to execute, and does not want the program to wait for the return of the method, it should use asynchronous programming. In many cases, the asynchronous approach is often more efficient.
+
+## 47. How many implementation methods are there for multi-threading? How many implementation methods are there for synchronization?
+
+There are two ways to implement multithreading, namely inheriting the Thread class and implementing the Runnable interface.
+
+There are two types of synchronization implementations, namely synchronized, wait and notify.
+
+wait(): Puts a thread in a waiting state and releases the lock of the object it holds.
+
+sleep(): puts a running thread into sleep state. It is a static method. Call this method to catch InterruptedException.
+
+notify(): Wake up a thread in a waiting state. Note that when this method is called, a thread in a waiting state cannot be exactly awakened. Instead, the JVM determines which thread to wake up, and not according to priority.
+
+Allnotity(): Wake up all threads in the waiting state. Note that you do not give all awakened threads an object lock, but let them compete.
+
+## 48. Should you use run() or start() to start a thread?
+
+To start a thread, you call the start() method to make the thread ready and can be scheduled to a running state later. A thread must be associated with some specific execution code. The run() method is the execution code associated with the thread.
+
+## 49. When a thread enters a synchronized method of an object, can other threads enter other methods of the object?
+
+There are several situations:
+
+1) Whether the synchronized keyword is added before other methods, if not, then yes.
+
+2) If this method calls wait internally, it can enter other synchronized methods.
+
+3) If the synchronized keyword is added to other methods and wait is not called internally, it will not work.
+
+4) If other methods are static, the synchronization lock they use is the bytecode of the current class, and cannot be synchronized with non-static methods, because non-static methods use this.
+
+## 50. The basic concept of threads, the basic status of threads, and the relationship between states.
+
+Multiple execution threads can be executed simultaneously in a program. A thread is an execution thread in the program. Each thread is associated with code to be executed. That is, multiple pieces of program code can be run at the same time. Each program has at least one Thread, that is, the thread where the main method is executed. If it is just a CPU, how can it execute multiple programs at the same time? This is from a macro point of view. The CPU will execute thread a at one time and thread b at another time. The switching time is very fast, giving the impression that a and b are executed at the same time. It is like everyone surfing the Internet in the same office and there is only one link to External network cable, in fact, this network cable transmits data for A at one time and data for B at another time. Since the switching time is very short, everyone feels that they are all surfing the Internet at the same time.
+
+Status: ready, running, synchronize blocked, wait and sleep suspended, ended. wait must be called inside synchronized.
+
+After calling the start method of the thread, the thread enters the ready state. The thread scheduling system changes the thread in the ready state to the running state. When encountering the synchronized statement, it changes from the running state to the blocking state. When synchronized obtains the lock, it changes from the blocking state to the running state. In this case, you can call the wait method to change to the suspended state. When the code associated with the thread is executed, the thread changes to the end state.
+
+## 51. Briefly describe the similarities and differences between synchronized and java.util.concurrent.locks.Lock?
+
+The main similarities: Lock can complete all functions implemented by synchronized.
+
+The main difference: Lock has more precise thread semantics and better performance than synchronized. synchronized will automatically release the lock, but Lock must require the programmer to release it manually, and it must be released in the finally clause. Lock also has more powerful functions. For example, its tryLock method can obtain the lock in a non-blocking manner.
+
+
+
+An example (the following question is rewritten using lock):
+
+```java
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class ThreadTest {
+    private int j;
+    private Lock lock = new ReentrantLock();
+
+    public static void main(String[] args) {
+        ThreadTest tt = new ThreadTest();
+        for (int i = 0; i < 2; i++) {
+            new Thread(tt.new Adder()).start();
+            new Thread(tt.new Subtractor()).start();
+        }
+    }
+
+    private class Subtractor implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+				/*synchronized (ThreadTest.this) {			
+					System.out.println("j--=" + j--);
+					//An exception is thrown here. Can the lock be released?
+				}*/
+                lock.lock();
+                try {
+                    System.out.println("j--=" + j--);
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
+
+    }
+
+    private class Adder implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+				/*synchronized (ThreadTest.this) {
+				System.out.println("j++=" + j++);	
+				}*/
+                lock.lock();
+                try {
+                    System.out.println("j++=" + j++);
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
+
+    }
+}
+```
+## 52. Design 4 threads, two of which increase j by 1 each time, and the other two threads decrease j by 1 each time. Write the program.
+
+The following program uses internal classes to implement threads, and does not consider the order when increasing or decreasing j.
+
+```java
+public class ThreadTest1
+{
+private int j;
+public static void main(String[] args){
+    ThreadTest1 tt=new ThreadTest1();
+    Inc inc=tt.new Inc();
+    Dec dec=tt.new Dec();
+    for(int i=0;i<2;i++){
+        Thread t=new Thread(inc);
+        t.start();
+        t=new Thread(dec);
+        t.start();
+        }
+    }
+private synchronized void inc(){
+    j++;
+    System.out.println(Thread.currentThread().getName()+"-inc:"+j);
+    }
+private synchronized void dec(){
+    j--;
+    System.out.println(Thread.currentThread().getName()+"-dec:"+j);
+    }
+class Inc implements Runnable{
+    public void run(){
+        for(int i=0;i<100;i++){
+        inc();
+        }
+    }
+}
+class Dec implements Runnable{
+    public void run(){
+        for(int i=0;i<100;i++){
+        dec();
+        }
+    }
+}
+}
+```
+----------Just another random one-------------
+
+```java
+class A
+{
+JManger j =new JManager();
+main()
+{
+	new A().call();
+}
+void call()
+{
+	for(int i=0;i<2;i++)
+	{
+		new Thread(
+			new Runnable(){ public void run(){while(true){j.accumulate();}}}
+		).start();
+		new Thread(new Runnable(){ public void run(){while(true){j.sub();}}}).start();
+	}
+}
+}
+classJManager
+{
+	private int j = 0;
+	
+	public synchronized void subtract()
+	{
+		j--;
+	}
+	
+	public synchronized void accumulate()
+	{
+		j++;
+	}
+	
+}
+```
+## 53. The sub-thread loops 10 times, then the main thread loops 100 times, then returns to the sub-thread to loop 10 times, then returns to the main thread and loops 100 times, and so on 50 times, please write the program.
+
+The final program code is as follows:
+
+```java
+public class ThreadTest {
+
+	public static void main(String[] args) {
+		new ThreadTest().init();
+	}
+	public void init()
+	{
+		final Business business = new Business();
+		new Thread(
+				new Runnable()
+				{
+					public void run() {
+						for(int i=0;i<50;i++)
+						{
+							business.SubThread(i);
+						}						
+					}
+					
+				}
+		
+		).start();
+		for(int i=0;i<50;i++)
+		{
+			business.MainThread(i);
+		}		
+	}
+	
+	private class business
+	{
+		boolean bShouldSub = true; //This is equivalent to defining a semaphore that controls who should execute
+		public synchronized void MainThread(int i)
+		{
+			if(bShouldSub)
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}		
+				
+			for(int j=0;j<5;j++)
+			{
+				System.out.println(Thread.currentThread().getName() + ":i=" + i +",j=" + j);
+			}
+			bShouldSub = true;
+			this.notify();
+		
+		}
+		
+		public synchronized void SubThread(int i)
+		{
+			if(!bShouldSub)
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+				
+			for(int j=0;j<10;j++)
+			{
+				System.out.println(Thread.currentThread().getName() + ":i=" + i +",j=" + j);
+			}
+			bShouldSub = false;				
+			this.notify();			
+		}
+	}
+}
+```
+Note: It is impossible to write the complete code above at the beginning. The initially written code is as follows. The problem is that the codes of the two threads need to refer to the same variable, that is, the codes of the two threads need to share data. Therefore, the two threads need to share data. The execution code of each thread is moved to the same class:
+
+```java
+package com.huawei.interview.lym;
+public class ThreadTest {
+	private static boolean bShouldMain = false;
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		/*new Thread(){
+		public void run()
+		{
+			for(int i=0;i<50;i++)
+			{
+				for(int j=0;j<10;j++)
+				{
+					System.out.println("i=" + i + ",j=" + j);
+				}
+			}				
+		}
+		
+	}.start();*/		
+				
+		//final String str = new String("");
+		new Thread(
+				new Runnable()
+				{
+					public void run()
+					{
+						for(int i=0;i<50;i++)
+						{
+							synchronized (ThreadTest.class) {
+								if(bShouldMain)
+								{
+									try {
+										ThreadTest.class.wait();}
+									catch (InterruptedException e) {
+										e.printStackTrace();
+									}
+								}
+								for(int j=0;j<10;j++)
+								{
+									System.out.println(
+											Thread.currentThread().getName() +
+											"i=" + i + ",j=" + j);
+								}
+								bShouldMain = true;
+								ThreadTest.class.notify();
+							}							
+						}						
+					}
+				}
+		).start();
+		
+		for(int i=0;i<50;i++)
+		{
+			synchronized (ThreadTest.class) {
+				if(!bShouldMain)
+				{
+					try {
+						ThreadTest.class.wait();}
+					catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}				
+				for(int j=0;j<5;j++)
+				{
+					System.out.println(
+							Thread.currentThread().getName() + 						
+							"i=" + i + ",j=" + j);
+				}
+				bShouldMain = false;
+				ThreadTest.class.notify();				
+			}			
+		}
+	}
+}
+```
+The following is implemented using the concurrency library in jdk5:
+```java
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Condition;
+public class ThreadTest
+{
+	private static Lock lock = new ReentrantLock();
+	private static Condition subThreadCondition = lock.newCondition();
+	private static boolean bBshouldSubThread = false;
+	public static void main(String [] args)
+	{
+		ExecutorService threadPool = Executors.newFixedThreadPool(3);
+		threadPool.execute(new Runnable(){
+			public void run()
+			{
+				for(int i=0;i<50;i++)
+				{
+					lock.lock();					
+					try
+					{					
+						if(!bBshouldSubThread)
+							subThreadCondition.await();
+						for(int j=0;j<10;j++)
+						{
+							System.out.println(Thread.currentThread().getName() + ",j=" + j);
+						}
+						bBshouldSubThread = false;
+						subThreadCondition.signal();
+					}catch(Exception e)
+					{						
+					}
+					finally
+					{
+						lock.unlock();
+					}
+				}			
+			}
+			
+		});
+		threadPool.shutdown();
+		for(int i=0;i<50;i++)
+		{
+				lock.lock();					
+				try
+				{	
+					if(bBshouldSubThread)
+							subThreadCondition.await();								
+					for(int j=0;j<10;j++)
+					{
+						System.out.println(Thread.currentThread().getName() + ",j=" + j);
+					}
+					bBshouldSubThread = true;
+					subThreadCondition.signal();					
+				}catch(Exception e)
+				{						
+				}
+				finally
+				{
+					lock.unlock();
+				}					
+		}
+	}
+}
+```
+## 54.What interface should be implemented to implement comparison in Collection framework?
+
+comparable/comparator
+
+## 55.The difference between ArrayList and Vector
+
+Both classes implement the List interface (the List interface inherits the Collection interface). They are both ordered collections, that is, the positions of the elements stored in these two collections are in order, which is equivalent to a dynamic array. , we can retrieve an element according to the position index number in the future, and the data in it is allowed to be repeated. This is the biggest difference between collections such as HashSet. Collections such as HashSet cannot retrieve elements by index number. , and no duplicate elements are allowed (the original question has nothing to do with hashset, but in order to clarify the functions of ArrayList and Vector, we use a comparison method, which is more conducive to explaining the problem).
+
+Then let’s talk about the difference between ArrayList and Vector, which mainly includes two aspects:.
+
+(1) Synchronicity:
+
+Vector is thread-safe, which means that its methods are thread-synchronized, while ArrayList is thread-unsafe, and its methods are thread-asynchronous. If only one thread will access the collection, it is best to use ArrayList, because it does not consider thread safety and will be more efficient; if multiple threads will access the collection, it is best to use Vector, because we do not need to do it ourselves Think about and write thread-safe code again.
+
+Note: For Vector&ArrayList, Hashtable&HashMap, you must remember the issue of thread safety. Remember that Vector and Hashtable are old and have been provided since the birth of Java. They are thread-safe. ArrayList and HashMap were provided only in Java 2. They are It is not thread safe. Therefore, when we give lectures, we talk about the old ones first.
+
+(2) Data growth:
+
+Both ArrayList and Vector have an initial capacity. When the number of elements stored in them exceeds the capacity, the storage space of ArrayList and Vector needs to be increased. Each time the storage space is increased, not just one storage unit is added. , but to add multiple storage units. The number of storage units added each time must achieve a certain balance between memory space utilization and program efficiency. Vector grows by twice its original size by default, while ArrayList's growth strategy is not clearly specified in the document (from the source code, it can be seen that it grows by 1.5 times its original size). Both ArrayList and Vector can set the initial space size, and Vector can also set the growth space size, while ArrayList does not provide a method for setting the growth space.
+
+Summary: Vector doubles its original size, and ArrayList increases its original size by 0.5 times.
+
+## 56.The difference between HashMap and Hashtable
+
+HashMap is a lightweight implementation of Hashtable (non-thread-safe implementation). They both complete the Map interface. The main difference is that HashMap allows empty (null) key values ​​(key). Due to non-thread safety, in the case of only one thread access , the efficiency is higher than Hashtable.
+
+HashMap allows null to be used as the key or value of an entry, but Hashtable does not. HashMap removed the contains method of Hashtable and changed it to containsvalue and containsKey. Because the contains method is easily misleading.
+
+Hashtable inherits from the Dictionary class, and HashMap is an implementation of the Map interface introduced in Java 1.2.
+
+The biggest difference is that Hashtable's method is Synchronized, but HashMap is not. When multiple threads access Hashtable, you do not need to synchronize its methods yourself, while HashMap must provide external synchronization for it.
+
+The hash/rehash algorithms used by Hashtable and HashMap are roughly the same, so there will not be a big difference in performance.
+
+As for HashMap and HashTable, there are three main aspects:
+
+1) Historical reasons: Hashtable is based on the old Dictionary class, and HashMap is an implementation of the Map interface introduced in Java 1.2;
+
+2) Synchronicity: Hashtable is thread-safe, which means it is synchronous, while HashMap is thread-safe and not synchronous;
+
+3) Value: Only HashMap allows you to use null values ​​as the key or value of a table entry
+
+## 57.What is the difference between List and Map?
+
+One is a collection that stores single-column data, and the other is a collection that stores double-column data such as keys and values. The data stored in the List is in order and is allowed to be repeated; the data stored in the Map is not in order, and its keys cannot be Duplicate, its value can be repeated.
+
+## 58.Do List, Set, and Map inherit from Collection interface?
+
+List, Set are, Map is not
+
+## 59. What are the characteristics of each of the three interfaces List, Map, and Set when accessing elements?
+
+This kind of question is a casual question: this kind of question compares the level of the test in two aspects: one is to truly understand the content, and the other is to have strong summary and presentation skills. If you understand it but don't express it clearly, it will be the same as not understanding it to others.
+
+First of all, List and Set are similar. They are both collections of single-column elements, so they have a common parent interface called Collection. Duplicate elements are not allowed in Set. The so-called duplication means that there cannot be two equal (note, not just the same) objects. That is, assuming that there is an A object in the Set collection, now I want to save another one to the Set collection. B object, but if the B object is equals to the A object, the B object cannot be stored. Therefore, the add method of the Set collection has a boolean return value. When there is no element in the set, the add method can successfully add the element. When the set contains an element equal to an element equals, the add method cannot add the element and the return result is false. When Set takes elements, there is no way to tell which number to take. You can only get all the elements through the Iterator interface, and then iterate through each element one by one.
+
+List represents a collection in sequence. Note that it is not sorted by age, size, price, etc. When we call the add(Obj e) method multiple times, the objects added each time are sorted in the order of first come, first served, just like the queue order for buying tickets at a train station. Sometimes, you can also jump in the queue, that is, call the add(int index,Obj e) method to specify the storage location of the current object in the collection. An object can be stored in the List repeatedly. Each time the add method is called, the object is inserted into the collection. In fact, the object itself is not stored in the collection, but an index variable is used to point to it in the collection. When this object is added multiple times, it means that there are multiple indexes in the collection pointing to this object, as shown in Figure x. In addition to obtaining all elements of List through the Iterator interface and traversing each element one by one, you can also call get(index i) to clearly indicate which number to retrieve.
+
+Map is different from List and Set. It is a double-column collection, which has a put method, which is defined as follows: put(obj key, obj value). Each time it is stored, a pair of key/value must be stored, and duplicate keys cannot be stored. This repetition rule is also based on equals comparison. The corresponding value can be obtained according to the key, that is, the return value of get(Object key) is the value corresponding to the key. In addition, you can also get the combination of all keys, the combination of all values, and the collection of Map.Entry objects composed of key and value.
+
+List holds elements in a specific order and may have duplicate elements. Set cannot have duplicate elements and is sorted internally. Map saves key-value values, and value can have multiple values.
+
+HashSet stores the hashcode value according to a certain operation method, rather than directly storing it according to the size of the hashCode value. For example, the storage order of "abc" ---> 78, "def" ---> 62, "xyz" ---> 65 in hashSet is not 62, 65, 78. LinkedHashSet is stored in the order of insertion, so what is the role of the hashcode method of the stored object? The hashset collection compares two objects to see if they are equal. It first checks whether the hashcode method is equal, and then checks whether the equals method is equal. new Insert two Students into the HashSet, check the size of the HashSet, and then check the size after implementing the hashcode and equals methods.
+
+The same object can be added multiple times to Vector. Adding elements to a collection is equivalent to connecting the collection to the target object with a rope. You cannot add multiple times to HashSet.
+
+## 60. Explain the storage performance and characteristics of ArrayList, Vector, and LinkedList
+
+Both ArrayList and Vector use arrays to store data. The number of array elements is larger than the actual stored data so that elements can be added and inserted. They both allow elements to be indexed directly by serial number, but inserting elements involves memory operations such as moving array elements, so indexing data Fast but slow to insert data. Because Vector uses the synchronized method (thread safety), its performance is usually worse than ArrayList, while LinkedList uses a doubly linked list for storage. Indexing data by serial number requires forward or backward traversal, but only when inserting data. You only need to record the items before and after this item, so the insertion speed is faster.
+
+LinkedList is also thread-unsafe. LinkedList provides some methods so that LinkedList can be used as a stack and a queue.
+
+## 61. Remove duplicate elements from a Vector collection
+
+```java
+Vector newVector = new Vector();
+For (int i=0;i<vector.size();i++)
+{
+Object obj = vector.get(i);
+	if(!newVector.contains(obj);
+		newVector.add(obj);
+}
+```
+There is another simple way
+```java
+HashSet set = new HashSet(vector);
+```
+## 62. The difference between Collection and Collections.
+
+Collection is the superior interface of the collection class, and the interfaces inherited from it mainly include Set and List.
+
+Collections is a helper class for the collection class. It provides a series of static methods to implement operations such as searching, sorting, and thread safety for various collections.
+
+## 63. The elements in Set cannot be repeated, so what method is used to distinguish whether they are repeated or not? Should you use == or equals()? What is the difference between them?
+
+The elements in the Set cannot be repeated. Whether the elements are repeated or not is determined using the equals() method.
+
+The equals() and == methods determine whether a reference value points to the same object. equals() is overridden in the class to return true when the contents and types of two separate objects match.
+
+## 64. What collection classes do you know? Main method?
+
+The most commonly used collection classes are List and Map. Specific implementations of List include ArrayList and Vector, which are variable-sized lists that are more suitable for constructing, storing, and manipulating element lists of any type of object. List is suitable for accessing elements by numerical index.
+
+Map provides a more general method of storing elements. The Map collection class is used to store pairs of elements (called "keys" and "values"), where each key maps to a value.
+
+What I remember is not the name of the method, but the idea. I know that they all have methods of adding, deleting, modifying and checking. Because as long as you press the dot operator under eclispe, these methods will naturally come out. Some ideas to remember are that the List class will have a method like get(int index) because it can take elements in order, but the set class does not have a method like get(int index). Both List and set can iterate out all elements. When iterating, you must first obtain an iterator object. Therefore, both the set and list classes have an iterator method for returning the iterator object. Map can return three collections, one returns a collection of all keys, the other returns a collection of all values, and the third returns a collection of EntrySet objects composed of keys and values. Map also has a get method, and the parameter is key. The return value is the value corresponding to the key.
+
+## 65. Two objects have the same value (x.equals(y) == true), but they can have different hash codes. Is this correct?
+
+right.
+
+If the objects are to be stored in a HashSet or HashMap and their equals are equal, then their hashcode values ​​must be equal.
+
+If it is not to be saved in HashSet or HashMap, it has nothing to do with hashcode. At this time, it is okay to have different hashcodes. For example, objects stored in arrayList do not need to implement hashcode. Of course, we have no reason not to implement it, and we usually implement it.
+
+## 66. When objects are placed in a TreeSet, if instance objects of both the parent class and the subclass are placed at the same time, then whether the compareTo method of the parent class or the compareTo method of the subclass is used for comparison, an exception will still be thrown!
+
+Whichever object the current add method puts in, the compareTo method of that object is called. As for how to do this compareTo method, it depends on how this method is written in the class of the current object.
+
+Code:
+
+```java
+public class Parent implements Comparable {
+	private int age = 0;
+	public Parent(int age){
+		this.age = age;
+	}
+	public int compareTo(Object o) {
+		// TODO Auto-generated method stub
+		System.out.println("method of parent");
+		Parent o1 = (Parent)o;
+		return age>o1.age?1:age<o1.age?-1:0;
+	}
+}
+public class Child extends Parent {
+	public Child(){
+		super(3);
+	}
+	public int compareTo(Object o) {
+			// TODO Auto-generated method stub
+			System.out.println("method of child");
+// Child o1 = (Child)o;
+			return 1;
+	}
+}
+public class TreeSetTest {
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		TreeSet set = new TreeSet();
+		set.add(new Parent(3));
+		set.add(new Child());
+		set.add(new Parent(4));
+		System.out.println(set.size());
+	}
+}
+```
+## 67. Name some commonly used classes, packages, and interfaces. Please name 5 of each.
+
+You want to make people feel that you are familiar with Java EE development, so you can''t just list those things in core Java. You should list more things that are involved in your SSH project. Just write down the things that are involved in the programs you have written recently. Those classes.
+
+Commonly used classes: BufferedReader BufferedWriter FileReader FileWirter String Integer
+
+java.util.Date, System, Class, List, HashMap
+
+Commonly used packages: java.lang java.io java.util java.sql,javax.servlet,org.apache.strtuts.action,org.hibernate
+
+Commonly used interfaces: Remote List Map Document NodeList, Servlet, HttpServletRequest, HttpServletResponse, Transaction (Hibernate), Session (Hibernate), HttpSession
+
+## 68.How many types of streams are there in java? JDK provides some abstract classes for each type of stream to inherit. Please tell me which classes they are?
+
+Byte stream, character stream.
+
+The byte stream inherits from InputStream OutputStream, and the character stream inherits from InputStreamReader OutputStreamWriter. There are many other streams in the java.io package, mainly for improving performance and ease of use.
+
+## 69. The difference between byte stream and character stream
+
+To output a piece of binary data to a certain device one by one, or to read a piece of binary data one by one from a certain device, no matter what the input and output device is, we need to complete these operations in a unified way, using an abstract This abstract description method is named IO stream, and the corresponding abstract classes are OutputStream and InputStream. Different implementation classes represent different input and output devices, and they all operate on bytes.
+
+In applications, it is often necessary to output or read a text that is completely composed of characters. Is it okay to use a byte stream? Everything in a computer ultimately exists in binary bytes. For the characters "China", first get the corresponding bytes, and then write the bytes to the output stream. When reading, the first thing read is bytes, but if we want to display it as characters, we need to convert the bytes into characters. Because such needs are widespread, people have specially provided packaging classes for character streams.
+
+The underlying device always only accepts byte data. Sometimes, if you want to write a string to the underlying device, you need to convert the string into bytes and then write it. The character stream is a wrapper for the byte stream. The character stream directly accepts strings. It converts the strings into bytes internally and then writes them to the underlying device. This provides a way for us to write or read strings to the IO device. A little bit convenient.
+
+When converting characters to bytes, pay attention to encoding issues, because converting a string into a byte array is actually converting it into a certain encoded byte form of the character, and the opposite is true when reading.
+
+```java
+Code examples of the relationship between byte stream and character stream:
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+public class IOTest {
+	public static void main(String[] args) throws Exception {
+		String str = "Chinese";
+		/*FileOutputStream fos = new FileOutputStream("1.txt");
+		
+		fos.write(str.getBytes("UTF-8"));
+		fos.close();*/
+		
+		/*FileWriter fw = new FileWriter("1.txt");
+		fw.write(str);
+		fw.close();*/
+		PrintWriter pw = new PrintWriter("1.txt","utf-8");
+		pw.write(str);
+		pw.close();
+		
+		/*FileReader fr = new FileReader("1.txt");
+		char[] buf = new char[1024];
+		int len ​​= fr.read(buf);
+		String myStr = new String(buf,0,len);
+		System.out.println(myStr);*/
+		/*FileInputStream fr = new FileInputStream("1.txt");
+		byte[] buf = new byte[1024];
+		int len ​​= fr.read(buf);
+		String myStr = new String(buf,0,len,"UTF-8");
+		System.out.println(myStr);*/
+		BufferedReader br = new BufferedReader(
+				new InputStreamReader(
+					new FileInputStream("1.txt"),"UTF-8"	
+					)
+				);
+		String myStr = br.readLine();
+		br.close();
+		System.out.println(myStr);
+	}
+}
+```
+## 70. What is java serialization and how to implement java serialization? Or please explain the role of Serializable interface.
+
+We sometimes transfer a Java object into a byte stream or restore it from a byte stream into a Java object. For example, we want to store the Java object on the hard disk or transmit it to other computers on the network. In this process, we You can write your own code to turn a java object into a byte stream of a certain format and then transmit it. However, jre itself provides this support. We can call the writeObject method of OutputStream to do it. If we want java to do it for us, The object to be transferred must implement the serializable interface. In this way, javac will perform special processing when compiling, so that the compiled class can be operated by the writeObject method. This is so-called serialization. The class that needs to be serialized must implement the Serializable interface. This interface is a mini interface with no methods that need to be implemented. Implements Serializable is just to mark that the object can be serialized.
+
+For example, in web development, if the object is saved in the Session, and Tomcat needs to serialize the Session object to the hard disk when restarting, this object must implement the Serializable interface. If the object needs to be transmitted over the network through a distributed system or remotely called through rmi, etc., the object needs to be transmitted over the network, and the object being transmitted must implement the Serializable interface.
+
+## 71. Describe the principle and mechanism of JVM loading class files?
+
+Class loading in the JVM is implemented by ClassLoader and its subclasses. Java ClassLoader is an important Java runtime system component. It is responsible for finding and loading classes from class files at runtime.
+
+## 72. What is the difference between heap and stack.
+
+Java's memory is divided into two categories, one is stack memory and the other is heap memory. Stack memory means that when the program enters a method, a private storage space will be allocated for this method to store local variables inside this method. When this method ends, the stack allocated to this method will be released. The variables will also be released accordingly.
+
+The heap is a memory that has different functions from the stack. It is generally used to store data that is not placed in the current method stack. For example, objects created using new are placed in the heap, so it will not disappear when the method ends. After the local variables in the method are modified with final, they are placed in the heap instead of the stack.
+
+## 73.What is GC? Why is there GC?
+
+GC means garbage collection (Gabage Collection). Memory processing is where programmers are prone to problems. Forgotten or wrong memory recycling can lead to instability or even crash of the program or system. The GC function provided by Java can automatically monitor whether the object exceeds the limit. Scope to achieve the purpose of automatically reclaiming memory, the Java language does not provide an explicit operation method to release allocated memory.
+
+## 74. Advantages and principles of garbage collection. And consider 2 recycling mechanisms.
+
+A notable feature of the Java language is the introduction of a garbage collection mechanism, which solves the most troublesome memory management problem for C++ programmers. It makes Java programmers no longer need to consider memory management when writing programs. Due to the garbage collection mechanism, objects in Java no longer have the concept of "scope". Only references to objects have "scope". Garbage collection can effectively prevent memory leaks and effectively use available memory. The garbage collector usually runs as a separate low-level thread to clear and recycle objects in the memory heap that have died or have not been used for a long time under unpredictable circumstances. Programmers cannot call the garbage collector in real time to recycle certain objects. objects or all objects are garbage collected. Recycling mechanisms include generational copy garbage collection, marked garbage collection, and incremental garbage collection.
+
+## 75. What is the basic principle of the garbage collector? Can the garbage collector reclaim memory immediately? Is there any way to actively notify the virtual machine to perform garbage collection?
+
+For GC, when the programmer creates an object, the GC begins to monitor the address, size and usage of the object. Usually, GC uses a directed graph to record and manage all objects in the heap. In this way it is determined which objects are "reachable" and which objects are "unreachable". When the GC determines that some objects are "unreachable", the GC is responsible for reclaiming these memory spaces. Can. Programmers can manually execute System.gc() to notify the GC to run, but the Java language specification does not guarantee that the GC will be executed.
+
+
+
+## 76. When to use assert.
+
+Assertion is a common debugging method in software development, and many development languages ​​support this mechanism. In implementation, assertion is a statement in the program that checks a boolean expression. A correct program must ensure that the value of the boolean expression is true; if the value is false, it means that the program is already in an incorrect state. , assert will give a warning or exit. Generally speaking, assertion is used to ensure the most basic and critical correctness of the program.
+
+Assertion checking is usually turned on during development and testing. In order to improve performance, assertion checking is usually turned off after the software is released.
+
+```java
+package com.huawei.interview;
+public class AssertTest {
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		int i = 0;
+		for(i=0;i<5;i++)
+		{
+			System.out.println(i);
+		}
+		//Suppose the program accidentally adds an extra sentence--i;
+		--i;
+		assert i==5;		
+	}
+}
+```
+## 77. Is there a memory leak in java? Please describe briefly.
+
+The so-called memory leak means that an object or variable that is no longer used by the program has been occupied in memory. There is a garbage collection mechanism in Java, which can ensure that when an object is no longer referenced, that is, when the object is orphaned, the object will be automatically cleared from the memory by the garbage collector. Since Java uses a directed graph for garbage collection management, it can eliminate the problem of reference cycles. For example, if there are two objects that reference each other, as long as they are inaccessible to the root process, the GC can also recycle them, such as the following code You can see memory reclamation in this case:
+
+```java
+package com.huawei.interview;
+import java.io.IOException;
+public class GarbageTest {
+	/**
+	 * @param args
+	 * @throwsIOException
+	 */
+	public static void main(String[] args) throws IOException {
+		// TODO Auto-generated method stub
+		try {
+			gcTest();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("has exited gcTest!");
+		System.in.read();
+		System.in.read();		
+		System.out.println("out begin gc!");		
+		for(int i=0;i<100;i++)
+		{
+			System.gc();
+			System.in.read();	
+			System.in.read();	
+		}
+	}
+	private static void gcTest() throws IOException {
+		System.in.read();
+		System.in.read();		
+		Person p1 = new Person();
+		System.in.read();
+		System.in.read();		
+		Person p2 = new Person();
+		p1.setMate(p2);
+		p2.setMate(p1);
+		System.out.println("before exit gctest!");
+		System.in.read();
+		System.in.read();		
+		System.gc();
+		System.out.println("exit gctest!");
+	}
+	private static class Person
+	{
+		byte[] data = new byte[20000000];
+		Person mate = null;
+		public void setMate(Person other)
+		{
+			mate = other;
+		}
+	}
+}
+```
+Memory leaks in Java: A memory leak is likely to occur when a long-lived object holds a reference to a short-lived object. Although the short-lived object is no longer needed, it is lost because the long-lived object holds its reference. As a result, it cannot be recycled. This is the scenario where memory leaks occur in Java. In layman''s terms, the programmer may create an object and never use it again. However, the object is always referenced, that is, the object is useless but cannot be used. Recycled by the garbage collector. This is the situation where memory leaks may occur in Java. For example, in the cache system, we load an object and put it in the cache (for example, in a global map object), and then never use it again. This object has been referenced by the cache, but is no longer used.
+
+To check for memory leaks in Java, you must let the program execute all branches until the end of the program, and then see if an object has been used. If not, then you can determine that the object is a memory leak.
+
+If a method of an instance object of an outer class returns an instance object of an inner class, the inner class object is referenced for a long time. Even if the outer class instance object is no longer used, because the inner class persists the instance object of the outer class, this External class objects will not be garbage collected, which will also cause memory leaks.
+
+The main feature is to clear an element in the stack, not to completely remove it from the array, but to reduce the total amount stored. When an element is removed, it also disappears from the array, and that element is Just set the value of the location to null:
+
+```java
+public class Stack {
+    private Object[] elements=new Object[10];
+    private int size = 0;
+    public void push(Object e){
+    ensureCapacity();
+        elements[size++] = e;
+    }
+    public Object pop(){
+        if( size == 0)
+        throw new EmptyStackException();
+            return elements[--size];
+        }
+    private void ensureCapacity(){
+        if(elements.length == size){
+            Object[] oldElements = elements;
+            elements = new Object[2 * elements.length+1];
+            System.arraycopy(oldElements,0, elements, 0, size);     
+        }
+    }
+}
+```
+The above principle should be very simple. If 10 elements are added to the stack and then all are popped out, although the stack is empty and there is nothing we want, this object cannot be recycled. This meets the two requirements of memory leaks. Condition: Useless, cannot be recycled.
+But even the existence of such a thing may not necessarily lead to any consequences. If this stack is used less, it will only waste a few K of memory. Anyway, our memory is already up to G, so there will be no impact. Besides, This thing will be recycled soon, so what does it matter?
+
+example:
+
+```java
+public class Bad{
+    public static Stack s=Stack();
+    static{
+        s.push(new Object());
+        s.pop(); //There is a memory leak in an object here
+        s.push(new Object()); //The above object can be recycled, which is equivalent to self-healing
+    }
+}
+```
+Because it is static, it will exist until the program exits, but we can also see that it has a self-healing function. That is to say, if your Stack has a maximum of 100 objects, then there will only be a maximum of 100 objects that cannot be recycled. In fact, this should be very It is easy to understand that Stack holds 100 references internally. The worst case scenario is that they are all useless, because once we add new ones, the previous references will naturally disappear!
+
+Another case of memory leak: When an object is stored in the HashSet collection, the fields in the object that participate in calculating the hash value cannot be modified. Otherwise, the modified hash value of the object will be different from the one originally stored in the HashSet. The hash value is different when it is in the collection. In this case, even if the contains method uses the current reference of the object as a parameter to retrieve the object in the HashSet collection, it will return the result that the object cannot be found, which will also As a result, the current object cannot be deleted individually from the HashSet collection, causing memory leaks.
+
+## 78. Can you write a class yourself, also called java.lang.String?
+
+Yes, but when applying, you need to use your own class loader to load it. Otherwise, the system class loader will always only load the java.lang.String in the jre.jar package. Since in tomcat's web application, the webapp's own class loader first loads the classes in the WEB-INF/classess directory, and then entrusts the superior class loader to load them. If we are in tomcat's web application, Write a java.lang.String. At this time, the Servlet program loads the java.lang.String we wrote ourselves. However, many potential problems will arise if we do this. All the original java.lang.String classes will appear. question.
+
+Although java provides endorsed technology, it can cover certain classes in jdk. The specific method is... However, the classes that can be covered are limited, and classes in packages such as java.lang are not included. For example, run the following program:
+
+```java
+package java.lang;
+public class String {
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		System.out.println("string");
+	}
+}
+```
+The errors reported are as follows:
+java.lang.NoSuchMethodError: main
+
+Exception in thread "main"
+
+This is because the java.lang.String that comes with jre is loaded, and there is no main method in this class.
+
+## 79. What are the ways to obtain a class object of a class?
+
+answer:
+
+Method 1: Type.class, for example: String.class
+
+Method 2: Object.getClass(), for example: "hello".getClass()
+
+Method 3: Class.forName(), for example: Class.forName("java.lang.String")
+
+#80.Java code error checking
+
+1)
+
+```java
+abstract class Name {
+    private String name;
+    public abstract boolean isStupidName(String name) {}
+}
+```
+What''s wrong with this?
+Answer: Wrong. abstract methods must end with a semicolon and without curly braces.
+
+2)
+
+```java
+public class Something {
+    void doSomething () {
+        private String s = "";
+        int l = s.length();
+    }
+}
+```
+Is there anything wrong?
+Answer: Wrong. No access modifiers (private, public, and protected) can be placed before local variables. final can be used to modify local variables (final, like abstract and strictfp, are non-access modifiers, and strictfp can only modify class and method rather than variable).
+
+3)
+
+```java
+abstract class Something {
+    private abstract String doSomething ();
+}
+```
+There seems to be nothing wrong with this, right?
+Answer: Wrong. Abstract methods cannot be modified with private. Abstract methods allow subclasses to implement specific details. How can we use private to block abstract methods? (Similarly, final cannot be added before abstract methods).
+
+4)
+
+```java
+public class Something {
+    public int addOne(final int x) {
+        return ++x;
+    }
+}
+```
+This is more obvious.
+Answer: Wrong. int x is modified as final, which means that x cannot be modified in the addOne method.
+
+5)
+
+```java
+public class Something {
+    public static void main(String[] args) {
+        Other o = new Other();
+        new Something().addOne(o);
+    }
+    public void addOne(final Other o) {
+        o.i++;
+    }
+}
+class Other {
+    public int i;
+}
+```
+Very similar to the above, they are all about final questions. Is this wrong?
+Answer: Correct. In the addOne method, parameter o is modified to final. If we modify the reference of o in the addOne method (for example: o = new Other();), then this question is also wrong like the above example. But what is modified here is the member vairable (member variable) of o, and the reference of o has not changed.
+
+6)
+
+```java
+class Something {
+    int i;
+    public void doSomething() {
+        System.out.println("i = " + i);
+    }
+}
+```
+What's wrong? I can't see it.
+Answer: Correct. The output is "i = 0". int i belongs to instant variable (instance variable, or member variable). Instant variable has default value. The default value of int is 0.
+
+7)
+
+```java
+class Something {
+    final int i;
+    public void doSomething() {
+        System.out.println("i = " + i);
+    }
+}
+```
+There is only one difference from the above question, that is, there is an additional final. Is this wrong?
+Answer: Wrong. final int i is a final instant variable (instance variable, or member variable). The final instant variable has no default value and must be assigned an explicit value before the constructor ends. Can be modified to "final int i = 0;".
+
+8)
+
+```java
+public class Something {
+    public static void main(String[] args) {
+        Something s = new Something();
+        System.out.println("s.doSomething() returns " + doSomething());
+    }
+    public String doSomething() {
+        return "Do something...";
+    }
+}
+```
+It looks perfect.
+Answer: Wrong. It seems that there is no problem in calling doSomething in main. After all, both methods are in the same class. But look carefully, main is static. Static methods cannot directly call non-static methods. Can be changed to "System.out.println("s.doSomething() returns " + s.doSomething());". In the same way, static methods cannot access non-static instant variables.
+
+9)
+
+Here, the file of the Something class is named OtherThing.java
+
+```java
+class Something {
+    private static void main(String[] something_to_do) {   
+        System.out.println("Do something ...");
+    }
+}
+```
+This seems obvious.
+Answer: Correct. No one has ever said that a Java Class name must be the same as its file name. But the name of the public class must be the same as the file name.
+
+10)
+
+```java
+interface A{
+    int x = 0;
+}
+class B{
+    int x =1;
+}
+class C extends B implements A {
+    public void pX(){
+        System.out.println(x);
+    }
+    public static void main(String[] args) {
+        new C().pX();
+    }
+}
+```
+Answer: Wrong. An error will occur during compilation (error description: Different JVMs have different information, which means unspecified x call, both x match (just like directly declaring Date when importing both java.util and java.sql packages at the same time) Same). For the variables of the parent class, you can use super.x to clarify, and the properties of the interface are implicitly public static final by default. Therefore, you can use Ax to clarify.
+11)
+
+```java
+interface Playable {
+    void play();
+}
+interface Bounceable {
+    void play();
+}
+interface Rollable extends Playable, Bounceable {
+    Ball ball = new Ball("PingPang");
+}
+class Ball implements Rollable {
+    private String name;
+    public String getName() {
+        return name;
+    }
+    public Ball(String name) {
+        this.name = name;   
+    }
+    public void play() {
+        ball = new Ball("Football");
+        System.out.println(ball.getName());
+    }
+}
+```
+This error is not easy to spot.
+Answer: Wrong.
+
+"interface Rollable extends Playable, Bounceable" is no problem. Interface can inherit from multiple interfaces, so this is correct. The problem lies in "Ball ball = new Ball("PingPang");" in interface Rollable. Any interface variable (interface variable, also called member variable) declared in the interface defaults to public static final. In other words, "Ball ball = new Ball("PingPang");" is actually "public static final Ball ball = new Ball("PingPang");". In the Play() method of the Ball class, "ball = new Ball("Football");" changes the reference of the ball, and the ball here comes from the Rollable interface. The ball in the Rollable interface is public static final, final object The reference cannot be changed.
+
+So the compiler will show an error here at "ball = new Ball("Football");"

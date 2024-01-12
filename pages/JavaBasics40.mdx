@@ -1,0 +1,695 @@
+# Java Basic 80 Interview Questions (1 - 40)
+
+## 1. Can a ".java" source file include multiple classes (not internal classes)? What are the restrictions?
+
+There can be multiple classes, but there can only be one public class, and the public class name must be consistent with the file name.
+
+## 2. Does Java have goto?
+
+No, but goto is a reserved word in java.
+
+## 3. Talk about the difference between & and &&
+
+Both & and && can be used as logical AND operators, indicating logical AND (and). When the results of the expressions on both sides of the operator are true, the entire operation result is true. Otherwise, as long as one side is false, then The result is false.
+
+&& also has the function of short-circuiting, that is, if the first expression is false, the second expression will no longer be evaluated. For example, for the if(str != null && !str.equals("")) expression, when When str is null, the following expression will not be executed, so NullPointerException will not occur. If && is changed to &, NullPointerException will be thrown. If(x==33 & ++y>0) y will grow, If(x==33 && ++y>0) will not grow
+
+& can also be used as a bitwise operator. When the expressions on both sides of the & operator are not of boolean type, & represents a bitwise AND operation. We usually use 0x0f to perform the & operation with an integer to obtain the lowest 4 bits of the integer. Bits, for example, 0x31 & 0x0f result in 0x01.
+
+## 4. How to get out of the current multiple nested loops in JAVA?
+
+In Java, if you want to break out of multiple loops, you can define a label before the outer loop statement, and then use the break statement with the label in the code of the inner loop body to jump out of the outer loop. For example,
+
+```java
+    ok:
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
+            System.out.println("i=" + i + ",j=" + j);
+            if (j == 5) break ok;
+        }
+    }
+```
+In addition, instead of using labels, the result of the outer loop conditional expression can be controlled by the inner loop body code, for example, to find a number in a two-dimensional array.
+
+```java
+    int[][] arr = {{1, 2, 3}, {4, 5, 6, 7}, {9}};
+    boolean found = false;
+    for (int i = 0; i < arr.length && !found; i++) {
+        for (int j = 0; j < arr[i].length; j++) {
+            System.out.println("i = " + i + ", j = " + j);
+            if (arr[i][j] == 5) {
+                found = true;
+                break;
+            }
+        }
+    }
+```
+
+Knock on the blackboard: It is recommended to use the second method, the first one has been eliminated by the industry.
+
+## 5. Can the switch statement operate on byte, long, or String?
+
+In switch (expr1), expr1 can only be an integer expression or enumeration constant (larger font). The integer expression can be the int basic type or the Integer wrapper type, because byte, short, and char can all be implicitly converted. is int, so these types and wrapper types of these types are also allowed.
+
+switch does not support the long type; starting from java1.7, switch starts to support String, which is Java's syntactic sugar.
+
+## 6. short s1 = 1; s1 = s1 + 1; What’s wrong? short s1 = 1; s1 += 1; What’s wrong?
+
+For `short s1 = 1; s1 = s1 + 1;` since the type of expression will be automatically promoted during the operation of `s1 + 1`, the result is int type. When assigning to short type s1, the compiler will report an error that requires cast type. .
+
+For `short s1 = 1; s1 += 1;` since `+=` is an operator specified in the Java language, the Java compiler will perform special processing on it, so it can be compiled correctly.
+
+## 7. Can a Chinese character be stored in a char variable? Why?
+
+Char-type variables are used to store Unicode-encoded characters. The Unicode-encoded character set includes Chinese characters, so of course Chinese characters can be stored in char-type variables. However, if a special Chinese character is not included in the unicode encoding character set, then the special Chinese character cannot be stored in this char variable. Additional explanation: Unicode encoding occupies two bytes, so variables of type char also occupy two bytes.
+
+## 8. Use the most efficient method to calculate what is 2 times 8?
+
+2 &lt;&lt; 3. Because shifting a number to the left by n bits is equivalent to multiplying 2 to the nth power, then, to multiply a number by 8, you only need to shift it to the left by 3 bits, and bit operations are directly supported by the CPU and are the most efficient, so , the most efficient way to find out what is 2 times 8 is 2 &lt;&lt; 3.
+
+## 9. Please design a 10 billion calculator
+
+First of all, you must understand what the test points of this question are. First, you must have a clear understanding of the underlying details of computer principles. You must know that the bit operation principles of addition and subtraction and arithmetic operations in computers may go out of bounds. Second, you must have certain skills. object-oriented design ideas.
+
+First of all, computers use a fixed number of bytes to store values, so the values ​​that can be expressed in computers have a certain range. Let’s take the byte type integer as an example. It uses 1 byte to store, representing The maximum value range for is -128 to +127. The corresponding binary data of -1 in memory is 11111111. If two -1 are added, regardless of the type promotion during Java operation, a carry will be generated after the operation, and the binary result is 1,11111110. Since the carry exceeds the byte type Storage space, so the carry part is discarded, that is, the final result is 11111110, which is -2, which just uses overflow to implement negative number operations. The corresponding binary data of -128 in the memory is 10000000. If two -128 are added, regardless of the type promotion during Java operation, a carry will be generated after the operation, and the binary result is 1,00000000. Since the carry exceeds the byte type storage space, so the carry part is discarded, that is, the final result is 00000000, which is 0. Such a result obviously does not meet expectations. This shows that arithmetic operations in computers will go out of bounds. The results of two numerical operations cannot exceed The range of values ​​for this type in the computer. Due to the automatic promotion of types when expression operations are involved in Java, it is impossible to use the byte type to do experiments to demonstrate this problem and phenomenon. You can use the following example program to experiment with integers to experience it:
+
+```java
+    int a = Integer.MAX_VALUE;
+    int b = Integer.MAX_VALUE;
+    int sum = a + b;
+    System.out.println("a="+a+",b="+b+",sum="+sum);
+```
+Ignoring the long type first, since the positive range of int is 2 to the 31st power, the maximum value represented is approximately equal to 2*1000*1000*1000, which is 2 billion in size. Therefore, a calculation of 10 billion is required. Converter, we have to design a class ourselves that can be used to represent very large integers and provide functions for addition, subtraction, multiplication and division with another integer. The approximate functions are as follows:
+
+1) There are two member variables inside this class, one represents the symbol, and the other uses a byte array to represent the binary number of the value;
+
+2) There is a constructor that converts a string containing a multi-digit value into an internal symbol and byte array;
+
+3) Provide functions of addition, subtraction, multiplication and division;
+
+```java
+public class BigInteger{
+		int sign;
+		byte[] val;
+		public Biginteger(String val) {
+			sign = ;
+			val = ;
+		}
+		public BigInteger add(BigInteger other) {
+			
+		}
+		public BigInteger subtract(BigInteger other) {
+			
+		}
+		public BigInteger multiply(BigInteger other){
+			
+		}
+		public BigInteger divide(BigInteger other){
+			
+		}
+}
+```
+Note: It is very complicated to write the complete code of this class. If you are interested, you can refer to the source code of the java.math.BigInteger class that comes with jdk. The interviewer also knows that no one can write the complete code of this class in a short time. What he wants is whether you have the concepts and awareness in this area. The most important thing he wants is to test your ability, so don’t do it because of it. If you can't write the complete final result, just give up answering this question. What you can do is write more than others to prove that you are better than others. Just have this awareness. After all, others may not even know the meaning of the question. If you don’t understand and haven’t written anything, you must dare to answer this question. Even if you only answer part of it, you will be able to distinguish yourself from those who don’t understand anything. You will be far away from them. You can be considered a tall man among the dwarfs. Of course, you will have a better chance. Got. In addition, the framework code in the answer is also very important, reflecting some basic knowledge of object-oriented design, especially the method naming is very professional, and the English words used are very precise. This is also a factor in ability, experience, professionalism, English proficiency, etc. The performance in this aspect will leave a good impression on people. When the programming ability and other conditions are similar, in addition to getting more opportunities, the salary can be a thousand yuan higher if the English is good.
+
+## 10. When using the final keyword to modify a variable, does the reference cannot be changed, or the referenced object cannot be changed?
+
+When using the final keyword to modify a variable, it means that the reference variable cannot be changed, but the contents of the object pointed to by the reference variable can still be changed. For example, for the following statement:
+
+```java
+final StringBuffer a = new StringBuffer("immutable");
+```
+Executing the following statement will report a compile-time error:
+```java
+a = new StringBuffer("");
+```
+However, executing the following statement will compile:
+```java
+a.append("broken!");
+```
+When someone defines the parameters of a method, they may want to use the following form to prevent the method from modifying the passed parameter object:
+
+```java
+public void method(final StringBuffer param){}
+```
+In fact, this is not possible. You can still add the following code inside the method to modify the parameter object:
+```java
+param.append("a");
+```
+## 11. What is the difference between "==" and equals method?
+
+The == operator is specifically used to compare whether the values ​​of two variables are equal, that is, to compare whether the values ​​stored in the memory corresponding to the variables are the same. To compare whether two basic types of data or two reference variables are equal, Only the == operator can be used.
+
+If the data pointed to by a variable is of object type, then two pieces of memory are involved at this time. The object itself occupies one piece of memory (heap memory), and the variable also occupies a piece of memory. For example, Objet obj = new Object(); the variable obj is a Memory, new Object() is another memory. At this time, the value stored in the memory corresponding to the variable obj is the first address of the memory occupied by the object. For variables pointing to object types, if you want to compare whether two variables point to the same object, that is, to see whether the values ​​in memory corresponding to the two variables are equal, you need to use the == operator for comparison.
+
+The equals method is used to compare whether the contents of two independent objects are the same, just like comparing whether two people look the same. The two objects it compares are independent. For example, for the following code:
+
+```java
+String a=new String("foo");
+String b=new String("foo");
+```
+Two new statements create two objects, and then use the two variables a and b to point to one of the objects respectively. These are two different objects, and their first addresses are different, that is, the values ​​​​stored in a and b. are not the same, so the expression a==b will return false, and the contents of the two objects are the same, so the expression a.equals(b) will return true.
+
+In actual development, we often need to compare whether the passed string content is equal. For example, String input = input.equals("quit"). Many people use == for comparison without paying attention. This is wrong. , just look for a few actual project teaching videos from the Internet, and there are a lot of such mistakes in them. Remember, string comparisons basically use the equals method.
+
+If a class does not define its own equals method, then it will inherit the equals method of the Object class. The implementation code of the equals method of the Object class is as follows:
+
+```java
+boolean equals(Object o){
+return this==o;
+}
+```
+This shows that if a class does not define its own equals method, its default equals method (inherited from the Object class) uses the == operator, which also compares whether the objects pointed to by the two variables are the same object. In this case, use equals and Using == will get the same result, and it will always return false if the comparison is between two independent objects. If the class you write hopes to be able to compare whether the contents of two instance objects created by the class are the same, then you must override the equals method and write your own code to determine under what circumstances the contents of the two objects are considered to be the same.
+
+## 12. What is the difference between static variables and instance variables?
+
+The difference in syntax definition: the static keyword must be added before static variables, but not before instance variables.
+
+The difference when the program is running: Instance variables belong to the attributes of an object. An instance object must be created before the instance variable in it will be allocated space and this instance variable can be used. Static variables do not belong to an instance object, but to a class, so they are also called class variables. As long as the program loads the bytecode of the class without creating any instance objects, the static variables will be allocated space, and the static variables can be used. In short, instance variables must create an object before they can be used through this object, while static variables can be referenced directly using the class name.
+
+For example, for the following program, no matter how many instance objects are created, only one staticVar variable is always allocated, and every time an instance object is created, this staticVar will be increased by 1; however, every time an instance object is created, an instanceVar will be allocated , that is, multiple instanceVar may be allocated, and the value of each instanceVar is only incremented once.
+
+```java
+public class VariantTest {
+    public static int staticVar = 0;
+    public int instanceVar = 0;
+
+    public VariantTest() {
+        staticVar++;
+        instanceVar++;
+        System.out.println("staticVar=" + staticVar + ",instanceVar=" + instanceVar);
+    }
+}
+```
+## 13. Is it possible to issue a call to a non-static method from within a static method?
+
+Can't.
+
+Because non-static methods are associated with objects, an object must be created before method calls can be made on the object. However, static methods do not need to create an object when calling, and can be called directly. In other words, when a static method is called, no instance object may have been created. If a call to a non-static method is issued from a static method, which object is the non-static method associated to? This logic cannot be established, so a static method internally issues a call to a non-static method.
+
+## 14. The difference between Integer and int
+
+int is one of the 8 primitive data types provided by java. Java provides wrapper classes for each primitive type. Integer is the wrapper class provided by java for int. The default value of int is 0, and the default value of Integer is null, that is, Integer can distinguish the difference between unassigned value and value 0, while int cannot express the situation of unassigned value. For example, if you want to express that you did not take the exam and the exam If the difference is 0, only Integer can be used. In JSP development, the default value of Integer is null, so when the el expression is used to display it in the text box, the value is a blank string, and the default value of int is 0, so when the el expression is used to display it in the text box, The result is 0, so int is not suitable as the form data type of the web layer.
+
+In Hibernate, if OID is defined as Integer type, then Hibernate can determine whether an object is temporary based on whether its value is null. If OID is defined as int type, it also needs to set its unsaved- in the hbm mapping file. The value attribute is 0.
+
+In addition, Integer provides multiple integer-related operation methods, such as converting a string into an integer. Integer also defines constants that represent the maximum and minimum values ​​of integers.
+
+## 15. What is Math.round(11.5) equal to? What is Math.round(-11.5) equal to?
+
+The Math class provides three methods related to rounding: ceil, floor, and round. The functions of these methods correspond to the meanings of their English names. For example, the English meaning of ceil is ceiling, and this method means rounding upward. , the result of Math.ceil(11.3) is 12, the result of Math.ceil(-11.3) is -11; the English meaning of floor is floor, this method means rounding down, the result of Math.floor(11.6) is 11. The result of Math.floor(-11.6) is -12; the most difficult thing to master is the round method, which means "rounding". The algorithm is Math.floor(x+0.5), which means adding 0.5 to the original number and then adding it to Round down, so the result of Math.round(11.5) is 12 and the result of Math.round(-11.5) is -11.
+
+## 16. Please tell the scope public, private, protected, and the difference when not written.
+
+The visible ranges of these four scopes are shown in the table below.
+
+Note: If no access modifier is written on the modified element, it means friendly (???).
+
+| scope | current class | same package | descendant classes | other packages |
+|----------|-------|-----------|------|-----------|
+| public | √ | √ | √ | √ |
+| protected | √ | √ | √ | × |
+| default | √ | √ | × | × |
+| private | √ | × | × | × |
+
+Note: As long as you remember that there are 4 access rights and 4 access ranges, and then arrange the selection and range in horizontal and vertical directions from small to large or from large to small, it is easy to draw the above of the picture.
+
+## 17. The difference between Overload and Override. Can Overloaded methods change the type of return value?
+
+Overload means overloading, and Override means overwriting, that is, rewriting.
+
+Overload means that there can be multiple methods with the same name in the same class, but the parameter lists of these methods are different (that is, the number or type of parameters are different).
+
+Overriding Override means that the method in the subclass can have the same name and parameters as a method in the parent class. When this method is called through an instance object created by the subclass, the method defined in the subclass will be called, which is equivalent to replacing The exact same method defined in the parent class is overwritten, which is also a manifestation of polymorphism in object-oriented programming. When a subclass overrides the methods of the parent class, it can only throw fewer exceptions than the parent class, or throw sub-exceptions of the exceptions thrown by the parent class, because the subclass can solve some problems of the parent class and cannot be better than the parent class. There are more questions. The access rights of subclass methods can only be greater than those of the parent class, not less. If the method of the parent class is of private type, then there is no overriding restriction in the subclass, which is equivalent to adding a brand new method to the subclass.
+
+As for the question of whether the Overloaded method can change the type of return value, it depends on what you want to ask? This topic is very vague. If the parameter lists of several Overloaded methods are different, of course their return types can also be different. But I guess the question you want to ask is: If the parameter lists of two methods are exactly the same, can they have different return values ​​to implement overloading. This is not possible. We can use proof by contradiction to illustrate this problem, because sometimes we do not need to define the return result variable when calling a method, that is, we do not care about its return result. For example, when we call the map.remove(key) method, Although the remove method has a return value, we usually do not define a variable to receive the return result. At this time, assuming that there are two methods in the class with the same name and parameter list, but the return type is different, Java cannot determine the programmer It depends on which method you want to call, because it cannot be judged by the return result type.
+
+Override can be translated as coverage. From the literal meaning, it covers a method and rewrites it to achieve different functions. The most familiar coverage for us is the implementation of interface methods. Generally, only methods are declared in the interface, and when we implement them, we need to implement all the methods declared by the interface. In addition to this typical usage, we may also override methods in the parent class in the subclass during inheritance. Please pay attention to the following points when covering:
+
+1) The flag of the overridden method must completely match the flag of the overridden method to achieve the overwriting effect;
+
+2) The return value of the overridden method must be consistent with the return value of the overridden method;
+
+3) The exception thrown by the overridden method must be consistent with the exception thrown by the overridden method, or be a subclass of it;
+
+4) The overridden method cannot be private, otherwise a new method will be defined in its subclass without overriding it.
+
+Overload may be familiar to us and can be translated as overloading. It means that we can define some methods with the same name and distinguish these methods by defining different input parameters. Then when calling again, the JVM will use different parameters to Style to choose the appropriate method to execute. Please pay attention to the following points when using overloading:
+
+1) Only different parameter styles can be passed when using overloading. For example, different parameter types, different number of parameters, different parameter order (of course, several parameter types in the same method must be different, for example, it can be fun(int, float), but it cannot be fun(int, int) ));
+
+2) It cannot be overloaded through access permissions, return types, and thrown exceptions;
+
+3) The exception type and number of methods will not affect overloading;
+
+4) For inheritance, if a method has privileged access rights in the parent class, it cannot be overloaded in the subclass. If it is defined, it will only define a new method without overloading it. load effect.
+
+## 18. Can the constructor Constructor be overridden?
+
+The constructor Constructor cannot be inherited, so Override cannot be overridden, but Overload can be overridden.
+
+## 19. Can interfaces inherit interfaces? Can abstract classes implement interfaces? Can abstract classes inherit concrete classes? Can there be a static main method in an abstract class?
+
+Interfaces can inherit from interfaces. Abstract classes can implement interfaces, and abstract classes can inherit concrete classes. Abstract classes can have static main methods.
+
+Note: As long as you understand the nature and function of interfaces and abstract classes, these questions are easy to answer. Think about it, if you were a designer of the Java language, would you provide such support? If not, what are the reasons? ? If there is no reason not to provide it, then the answer is yes.
+
+Just remember that the only difference between abstract classes and ordinary classes is that instance objects cannot be created and abstract methods are allowed.
+
+## 20. When writing the clone() method, there is usually a line of code. What is it?
+
+clone has the default behavior, super.clone(); because the members of the parent class must be copied into place first, and then its own members are copied.
+
+## 21. What are the characteristics of object-oriented
+
+Computer software systems are the mapping of real-life business on the computer, and real-life business is actually a process of object collaboration. Object-oriented programming is to organize and write program code according to objects in the same way as real business, so that the computer system can recognize and understand the program code organized and written in object mode, so that the business objects in real life can be mapped into the computer system.
+
+Object-oriented programming languages ​​have four main characteristics: encapsulation, inheritance, abstraction, and polymorphism.
+
+1) Package:
+
+Encapsulation is the basis for ensuring that software components have excellent modularity. The goal of encapsulation is to achieve "high cohesion and low coupling" of software components and prevent the impact of changes caused by program interdependence. In object-oriented programming languages, objects are the most basic unit of encapsulation. Object-oriented encapsulation is clearer and more powerful than encapsulation in traditional languages. Object-oriented encapsulation is to encapsulate the code describing the properties and behavior of an object in a "module", that is, a class. The properties are defined with variables, and the behavior is defined with methods. Methods can directly access the properties in the same object. . Under normal circumstances, just remember to put the variable and the method to access the variable together, and define all member variables in a class as private. Only the class's own methods can access these member variables. This is basically By implementing the encapsulation of objects, it is easy to find out the methods to be assigned to this class, which is basically object-oriented programming. Grasp one principle: put methods and related methods that operate on the same thing in the same class, and put methods and the data they operate on in the same class.
+
+For example, if a person wants to draw a circle on the blackboard, this involves a total of three objects: the person, the blackboard, and the circle. Which object should the method of drawing a circle be assigned to? Since drawing a circle requires the use of the center and radius, the center and radius are obviously attributes of the circle. If they are defined as private member variables in the class, then the method of drawing a circle must be assigned to the circle before it can access the center and radius. For these two attributes of radius, people will only call the circle drawing method of the circle to send messages to the circle. The circle drawing method should not be allocated to the object of the person. This is object-oriented encapsulation, that is, the object is encapsulated into a A highly autonomous and relatively closed individual, the object state (properties) is read and changed by the object's own behavior (methods). A more easy-to-understand example is that the driver brakes the train. Should the braking action be assigned to the driver or to the train? Obviously, it should be assigned to the train, because the driver himself cannot have that much strength to brake a train. To stop, only the train itself can complete this action. The train needs to use multiple internal components such as clutches and brake pads to cooperate to complete the braking action. The driver's braking process only sends a message to the train, notifying the train to perform braking. Just an action.
+
+2) Inheritance:
+
+When defining and implementing a class, you can do it on the basis of an existing class. You can use the content defined by the existing class as your own content, and you can add some new content or modify the original method. Making it more suitable for special needs is called inheritance. Inheritance is a mechanism for subclasses to automatically share parent class data and methods. This is a relationship between classes that improves the reusability and scalability of software.
+
+3) Abstraction:
+
+Abstraction is to find out the similarities and commonalities of some things, and then classify these things into a class. This class only considers the similarities and commonalities of these things, and ignores those aspects that are irrelevant to the current topic and goal. Focus on aspects related to current goals. For example, if you see an ant and an elephant and you can imagine how they are similar, that is abstraction. Abstraction includes two aspects: behavioral abstraction and state abstraction. For example, define a Person class as follows:
+```java
+class Person{
+
+String name;
+
+int age;
+
+}
+```
+
+People are inherently complex things with many aspects, but because the current system only needs to know the person's name and age, the class defined above only contains the two attributes of name and age. This is a kind of abstraction. Using abstraction You can avoid thinking about details that are irrelevant to your goals. My understanding of abstraction is not to use a microscope to look at all aspects of a thing, which would involve too much content, but to be good at dividing the boundaries of the problem, and only consider what the current system needs.
+
+4) Polymorphism:
+
+Polymorphism means that the specific type pointed to by the reference variable defined in the program and the method calls issued through the reference variable are not determined during programming, but are determined during the running of the program, that is, which class a reference variable will point to. Instance object, the method call issued by the reference variable is a method implemented in which class, it must be determined during the running of the program. Because the specific class is determined only when the program is running, the reference variable can be bound to various class implementations without modifying the source program code, causing the specific method called by the reference to change accordingly, that is, it does not need to be modified. The program code can change the specific code bound to the program when it is running, allowing the program to select multiple running states. This is polymorphism. Polymorphism enhances software flexibility and scalability. For example, UserDao in the following code is an interface. It defines that the instance object pointed to by the reference variable userDao is returned by daofactory.getDao() during execution. Sometimes it points to the implementation of UserJdbcDao, and sometimes it points to the implementation of UserHibernateDao. In this way, without modifying the source code, you can change the specific class implementation pointed by userDao, which will cause the specific code called by userDao.insertUser() method to also change, that is, sometimes the insertUser method of UserJdbcDao is called, and sometimes it is called UserHibernateDao's insertUser method:
+
+UserDao userDao = daofactory.getDao();
+
+userDao.insertUser(user);
+
+Metaphor: When a person eats, do you see the left hand or the right hand?
+
+## 22.What is the mechanism to implement polymorphism in java?
+
+It relies on the fact that the reference variables defined by the parent class or interface can point to the instance object of the subclass or specific implementation class, and the method called by the program is dynamically bound at runtime, which is the method of the specific instance object pointed by the reference variable, that is Methods of the object running in memory, not methods defined in the type of the reference variable.
+
+## 23.What is the difference between abstract class and interface?
+
+A class containing the abstract modifier is an abstract class, and an abstract class cannot create instance objects. Classes containing abstract methods must be defined as abstract class, and methods in abstract class classes do not have to be abstract. Abstract methods defined in an abstract class must be implemented in a concrete subclass, so there cannot be abstract constructors or abstract static methods. If the subclass does not implement all abstract methods in the abstract parent class, then the subclass must also be defined as abstract type.
+
+An interface can be said to be a special case of an abstract class, and all methods in the interface must be abstract. The method definitions in the interface default to public abstract type, and the member variable types in the interface default to public static final.
+
+Let’s compare the grammatical differences between the two:
+
+1) Abstract classes can have constructors, but interfaces cannot have constructors.
+
+2) There can be ordinary member variables in abstract classes, but there are no ordinary member variables in interfaces.
+
+3) Abstract classes can contain non-abstract ordinary methods. All methods in the interface must be abstract, and there cannot be non-abstract ordinary methods.
+
+4) The access type of abstract methods in abstract classes can be public, protected and (default type, although
+
+No error is reported under eclipse, but it should not work), but the abstract method in the interface can only be of public type, and the default is public abstract type.
+
+5) Abstract classes can contain static methods, but interfaces cannot contain static methods.
+
+6) Both abstract classes and interfaces can contain static member variables. The access types of static member variables in abstract classes can be arbitrary, but variables defined in interfaces can only be of public static final type, and the default is public static final type.
+
+7) A class can implement multiple interfaces, but can only inherit one abstract class.
+
+
+
+Let’s talk about the differences between the two in application:
+
+Interfaces play more of a role in system architecture design methods and are mainly used to define communication contracts between modules. Abstract classes play a role in code implementation and can realize code reuse. For example, the template method design pattern is a typical application of abstract classes. It is assumed that all Servlet classes in a project must use the same method to determine permissions and record access. Log and handle exceptions, then you can define an abstract base class so that all Servlets inherit this abstract base class. In the service method of the abstract base class, permission judgment, access log recording and exception handling code are completed. The classes only complete their respective business logic codes. The pseudo code is as follows:
+
+```java
+public abstract class BaseServlet extends HttpServlet {
+
+    public final void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        //Record access logs and perform permission judgment
+        if (has permission) {
+            try {
+                doService(request, response);
+            } catch (Exception e) {
+                // todo: record exception information
+            }
+        }
+    }
+
+    protected abstract void doService(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        //Note that the access permission is defined as protected, which looks professional and rigorous because it is specially used for subclasses.
+    }
+}
+```
+
+```java
+public class MyServlet1 extends BaseServlet {
+    protected void doService(HttpServletRequest request, HttpServletResponse response) throws IOExcetion, ServletException {
+        // This Servlet only handles specific business logic code
+    }
+}
+```
+A certain section of code in the middle of the parent class method is uncertain and is left to the subclass, so the template method is used to design the pattern.
+Note: The idea of ​​this question is to first explain the basic concepts of abstract classes and interfaces in general, then compare the grammatical details of the two, and finally talk about the application differences between the two. The method for comparing the differences in grammatical details between the two is: first compare and answer one by one from six aspects such as constructors, ordinary member variables and methods (including abstract methods), static variables and methods, and inheritance in a class, and then start from the third Answer from the perspective of inheritance, especially at the end using a typical example to show my profound technical skills.
+
+## 24. Can the abstract method be static, native, and synchronized at the same time?
+
+Abstract methods cannot be static, because abstract methods must be implemented by subclasses, and static has nothing to do with subclasses!
+
+The native method means that the method is to be implemented in another platform-dependent programming language. There is no problem of being implemented by a subclass. Therefore, it cannot be abstract and cannot be mixed with abstract. For example, the FileOutputSteam class needs to deal with hardware, and the underlying implementation uses operating system-related api implementation. For example, it is implemented in C language in Windows. Therefore, looking at the source code of jdk, you can find that the open method of FileOutputStream is defined as follows:
+
+private native void open(String name) throws FileNotFoundException;
+
+If we want to use Java to call a C language function written by others, we cannot call it directly. We need to write a C language function according to the requirements of Java, and then our C language function calls someone else's C language function. Since our C language function is written according to the requirements of Java, our C language function can be connected to Java. The docking method on the Java side is to define the method corresponding to our C function. The corresponding method in Java The method does not need to write specific code, but it needs to be declared native in front.
+
+Regarding the problem of using synchronized and abstract together, I don’t think it’s possible, because in my several years of study and development, I have never seen this situation, and I think synchronized should be used in a specific method to make sense. Moreover, the synchronization lock object used for synchronized synchronization on the method is this, and it is impossible to determine what this is on the abstract method.
+
+## 25. What is an inner class? The difference between Static Nested Class and Inner Class.
+
+An inner class is a class defined inside a class. Static members cannot be defined in an inner class (static members are not a feature of the object. They are just to find a place to stay, so they need to be placed in a class. For such a small thing, you still have to It's too much to put it in a class inside the class! The inner class is not provided to let you do this kind of thing. It's boring and won't let you do it. I think it may be because static members are similar to global variables in the C language. Inner classes are usually used to create internal objects, so it is meaningless to put "global variables" in inner classes. Since it is meaningless, it should be banned). Inner classes can directly To access member variables in an outer class, the inner class can be defined outside the method of the outer class or in the method body of the outer class, as shown below:
+
+```java
+public class Outer {
+    int out_x = 0;
+
+    public void method() {
+        //Inner class defined inside the method body
+        class Inner2 {
+            public void method() {
+                out_x = 3;
+            }
+        }
+        Inner2 inner2 = new Inner2();
+    }
+
+    //Inner class defined outside the method body
+    public class Inner1 {
+
+    }
+}
+```
+The access types of the inner class defined outside the method body can be public, protected, default, private, etc. This is just like the member variables defined in the class have four access types. They determine the definition of the inner class. Whether other classes are visible; in this case, we can also create an instance object of the inner class outside. When creating an instance object of the inner class, we must first create an instance object of the outer class, and then use the instance object of this outer class to create Instance object of inner class, the code is as follows:
+
+```java
+Outer outer = new Outer();
+Outer.Inner1 inner1 = outer.new Innner1();
+```
+There cannot be access type modifiers in front of inner classes defined inside methods, just like local variables defined in methods, but such inner classes can be preceded by final or abstract modifiers. This inner class is invisible to other classes and other classes cannot reference this inner class, but the instance objects created by this inner class can be passed to other classes for access. This kind of internal class must be defined first and then used, that is, the definition code of the internal class must appear before using the class. This is the same as the local variables in the method must be defined first and then used. This kind of inner class can access local variables in the method body, but the local variable must be preceded by the final modifier.
+
+For these details, just try writing code in eclipse and you can learn it immediately according to the various error messages prompted by the development tools.
+
+You can also use the following syntax to create an anonymous inner class inside the method body, that is, while defining a subclass of an interface or class, an instance object of the subclass is also created without defining a name for the subclass:
+
+```java
+public class Outer {
+    public void start() {
+        new Thread(new Runnable() {
+            public void run() {
+            }
+        }).start();
+    }
+}
+```
+Finally, the static keyword can be added in front of the inner class defined outside the method to become a Static Nested Class. It no longer has the characteristics of an inner class, so in a narrow sense, it is not an inner class. There is no difference between Static Nested Class and ordinary classes in terms of runtime behavior and functions. There are only some differences in the syntax when programming references. It can be defined as public, protected, default, private and other types, while ordinary classes It can only be defined as public and default types. The name of the Static Nested Class referenced outside is "external class name.internal class name". You can directly create a Static Nested Class without creating an instance object of the external class. For example, assuming that Inner is a Static Nested Class defined in the Outer class, you can use the following statement to create the Inner class:
+
+```java
+Outer.Inner inner = new Outer.Inner();
+```
+Since the static Nested Class does not depend on the instance object of the external class, the static Nested Class can access the non-static member variables of the external class. When accessing a Static Nested Class in an external class, you can directly use the name of the Static Nested Class without adding the name of the external class. In the Static Nested Class, you can also directly reference the static member variables of the external class without adding the name of the external class. Add the name of the external class.
+
+The inner class defined in the static method is also a Static Nested Class. At this time, the static keyword cannot be added in front of the class. The Static Nested Class in the static method is very similar to the application method of the inner class in the ordinary method. In addition to directly accessing the external Static member variables in a class can also access local variables in static methods. However, the final modifier must be added before the local variable.
+
+Remarks: First, state your overall characteristics of internal classes based on your impression. For example, it can be defined in two places, and member variables of external classes can be accessed, but static members cannot be defined. This is a big feature. Then let’s talk about some detailed knowledge, such as the grammatical differences between several definition methods, static inner classes, and anonymous inner classes.
+
+## 26. Can an inner class reference members of its containing class? Are there any restrictions?
+
+absolutely okay. If it's not a static inner class, there's no limit!
+
+If the static nested class is regarded as a special case of the inner class, then in this case the ordinary member variables of the outer class cannot be accessed, but only the static members in the outer class can be accessed. For example, the following code:
+
+```java
+class Outer {
+    static int x;
+
+    static class Inner {
+        void test() {
+            syso(x);
+        }
+    }
+}
+```
+When answering questions, you should also be able to observe the words and emotions of the questioner and figure out the mind of the questioner. Obviously, what the interviewer wants to know is that static inner classes cannot access members of outer classes. However, it is not good if you start to criticize others. You must first follow others and let others know. Be satisfied, and then talk about special circumstances to surprise people.
+
+## 27. Can Anonymous Inner Class extend (inherit) other classes, and can it implement interface (interface)?
+
+Can inherit from other classes or implement other interfaces. Not only can it be done, but it must be done!
+
+## 28.super.getClass() method call
+
+What is the output of the following program?
+
+```java
+import java.util.Date;
+
+public class Test extends Date {
+	public static void main(String[] args) {
+		new Test().test();
+	}
+	
+	public void test() {
+		System.out.println(super.getClass().getName());
+	}
+}
+```
+Strangely, the result is Test.
+
+In the test method, the getClass().getName() method is directly called, and the Test class name is returned. Since getClass() is defined as final in the Object class, subclasses cannot override this method. Therefore, calling the getClass().getName() method in the test method is actually calling the getClass() method inherited from the parent class. It is equivalent to calling the super.getClass().getName() method, so the super.getClass().getName() method should also return Test.
+
+If you want to get the name of the parent class, you should use the following code:
+
+```java
+getClass().getSuperClass().getName();
+```
+## 29. Is String the most basic data type?
+
+Basic data types include byte, int, char, long, float, double, boolean and short.
+
+The java.lang.String class is of final type, so this class cannot be inherited or modified. In order to improve efficiency and save space, we should use the StringBuffer class
+
+## 30.String s = "Hello"; s = s + " world!"; After these two lines of code are executed, has the content in the original String object changed?
+
+No.
+
+Because String is designed to be an immutable class, all its objects are immutable objects. In this code, s originally pointed to a String object with the content "Hello", and then we performed a + operation on s. Has the object pointed to by s changed? The answer is no. At this time, s no longer points to the original object, but to another String object with the content "Hello world!". The original object still exists in the memory, but the reference variable s no longer points to it.
+
+From the above description, we can easily draw another conclusion. If various modifications are often made to the string, or unforeseen modifications, then using String to represent the string will cause a lot of memory overhead. Because the String object cannot be changed after it is created, a String object is needed to represent each different string. At this time, you should consider using the StringBuffer class, which allows modification, rather than generating a new object for each different string. Moreover, it is very easy to convert these two types of objects.
+
+At the same time, we can also know that if you want to use a string with the same content, you don't have to create a new String every time. For example, if we want to initialize a String reference variable named s in the constructor and set it to the initial value, we should do this:
+
+```java
+public class Demo {
+private String s;
+...
+public Demo {
+	s = "Initial Value";
+}
+...
+}
+```
+rather than
+```java
+s = new String("Initial Value");
+```
+The latter will call the constructor every time to generate a new object, which has low performance and high memory overhead, and is meaningless because the String object cannot be changed, so for strings with the same content, only one String object is needed to represent them. In other words, if you call the above constructor multiple times to create multiple objects, their String type attributes s all point to the same object.
+
+The above conclusion is also based on the fact that for string constants, if the contents are the same, Java considers them to represent the same String object. Calling the constructor with the new keyword will always create a new object, regardless of whether the contents are the same.
+
+As for why the String class should be designed as an immutable class, it is determined by its purpose. In fact, not only String, but also many classes in the Java standard class library are immutable. When developing a system, we sometimes need to design immutable classes to pass a set of related values, which is also a manifestation of object-oriented thinking. Immutable classes have some advantages. For example, because its objects are read-only, there will be no problems with concurrent access by multiple threads. Of course, there are also some disadvantages. For example, each different state needs an object to represent it, which may cause performance problems. Therefore, the Java standard class library also provides a variable version, StringBuffer.
+
+## 31. Can I inherit the String class?
+
+The String class is a final class and cannot be inherited.
+
+## 32.String s = new String("xyz");How many String Objects are created? What is the difference between the two?
+
+Two or one, "xyz" corresponds to an object. This object is placed in the string constant buffer. No matter how many times the constant "xyz" appears, it will be the one in the buffer. Every time New String is written, a new object is created, which uses the contents of the constant "xyz" object to create a new String object. If 'xyz' has been used before, this means that "xyz" itself will not be created, but will be taken directly from the buffer.
+
+## 33. The difference between String and StringBuffer
+
+The JAVA platform provides two classes: String and StringBuffer, which can store and operate strings, that is, character data containing multiple characters. The String class provides numerically immutable strings. The string provided by this StringBuffer class is modified. You can use StringBuffer when you know the character data is going to change. Typically, you use StringBuffers to dynamically construct character data. In addition, String implements the equals method, and the result of new String("abc").equals(new String("abc") is true, but StringBuffer does not implement the equals method, so new StringBuffer("abc").equals(new The result of StringBuffer("abc") is false.
+
+Next, let's give a specific example to illustrate. We need to put together all the numbers from 1 to 100 to form a string.
+
+```java
+StringBuffer sbf = new StringBuffer();
+for(int i=0;i<100;i++)
+{
+	sbf.append(i);
+}
+```
+The code above is very efficient because only one StringBuffer object is created, while the code below is inefficient because 101 objects are created.
+
+```java
+String str = new String();
+for(int i=0;i<100;i++)
+{
+	str = str + i;
+}
+```
+When talking about the difference between the two, you should set the number of loops to 10,000, and then use endTime-beginTime to compare the execution time difference between the two. Finally, let's talk about the difference between StringBuilder and StringBuffer.
+
+String covers the equals method and hashCode method, but StringBuffer does not cover the equals method and hashCode method. Therefore, problems will occur when storing StringBuffer objects into Java collection classes.
+
+## 34. How to convert a comma-delimited string into an array?
+
+1) Using regular expressions, the code is probably:
+
+```java
+String [] result = orgStr.split(",");
+```
+2) Using StringTokenizer, the code is:
+```java
+StringTokenizer tokener = StringTokenizer(orgStr,",");
+String [] result = new String[tokener .countTokens()];
+Int i=0;
+while(tokener.hasNext(){result[i++]=toker.nextToken();}
+```
+## 35. Does the array have the length() method? Does the String have the length() method?
+
+Arrays do not have a length() method, but have a length attribute. String has the length() method.
+
+## 36. How many objects are created in total by the following statement? String s="a"+"b"+"c"+"d";
+
+For the following code:
+
+```java
+String s1 = "a";
+String s2 = s1 + "b";
+String s3 = "a" + "b";
+System.out.println(s2 == "ab");
+System.out.println(s3 == "ab");
+```
+The result printed by the first statement is false, and the result printed by the second statement is true. This shows that javac compilation can optimize the expression of direct addition of string constants, and there is no need to wait until the runtime to perform the addition operation. It is to remove the plus sign during compilation and directly compile it into a result of connecting these constants.
+
+The first line of code in the question is optimized by the compiler at compile time, and is equivalent to directly defining a string of "abcd". Therefore, the above code should only create a String object. Write the following two lines of code,
+
+```java
+String s = "a" + "b" + "c" + "d";
+System.out.println(s == "abcd");
+```
+The final printed result should be true.
+
+## 37. There is a return statement in try {}, so will the code in finally {} immediately following the try be executed? When will it be executed? Before or after return?
+
+Maybe your answer is before return, but to be more specific, my answer is to execute it in the middle of return. Please see the running results of the following program code:
+
+```java
+public class Test {
+
+    public static void main(String[] args) {
+        System.out.println(Test.test());
+    }
+
+    static int test() {
+        int x = 1;
+        try {
+            return x;
+        } finally {
+            ++x;
+        }
+    }
+}
+```
+---------Results of the---------
+
+1
+
+The running result is 1, why? The process of the main function calling the sub-function and getting the result is like the main function preparing an empty jar. When the sub-function wants to return the result, it first puts the result in the jar, and then returns the program logic to the main function. The so-called return means that the sub-function says, "I won't run it anymore. Let your main function continue to run. There is no result at all. The result is put into the jar before saying this."
+
+## 38. What is the output result of the following program code?
+
+```java
+public class SmallT {
+    public static void main(String args[]) {
+        SmallT t = new SmallT();
+        int b = t.get();
+        System.out.println(b);
+    }
+
+    public int get() {
+        try {
+            return 1;
+        } finally {
+            return 2;
+        }
+    }
+}
+```
+The returned result is 2.
+
+From the running results of the following example, we can find that the function called by the return statement in try is executed before the function called in finally. That is to say, the return statement is executed first and the finally statement is executed later. Therefore, the returned result is 2. Return does not allow the function to return immediately. Instead, after the return statement is executed, the return result will be placed on the function stack. At this time, the function does not return immediately. It must execute the finally statement before it actually starts to return.
+
+When explaining the answer, you can use the following procedure to help analyze:
+
+```java
+public class Test {
+    /**
+     * @param args add by leixiaoshuai The Laughing Architect
+     */
+    public static void main(String[] args) {
+        System.out.println(new Test().test());
+    }
+
+    int test() {
+        try {
+            return func1();
+        } finally {
+            return func2();
+        }
+    }
+
+    int func1() {
+        System.out.println("func1");
+        return 1;
+    }
+
+    int func2() {
+        System.out.println("func2");
+        return 2;
+    }
+}
+```
+-----------Results of the-----------------
+func1
+
+func2
+
+2
+
+Conclusion: The code in finally is executed after the return and break statements.
+
+## 39.The difference between final, finally and finalize.
+
+final is used to declare properties, methods and classes, which respectively means that properties are immutable, methods cannot be overridden, and classes cannot be inherited.
+
+For inner classes to access local variables, local variables must be defined as final type.
+
+Finally is part of the exception handling statement structure, indicating that it is always executed.
+
+finalize is a method of the Object class. This method of the recycled object will be called when the garbage collector is executed. This method can be overridden to provide other resource recycling during garbage collection, such as closing files, etc. The JVM does not guarantee that this method will always be called
+
+## 40. What are the similarities and differences between runtime exceptions and general exceptions?
+
+Exceptions represent abnormal conditions that may occur during program running. Runtime exceptions represent abnormalities that may be encountered in the normal operation of a virtual machine and are a common operating error. The Java compiler requires that methods must be declared to throw non-runtime exceptions that may occur, but it is not required to be declared to throw uncaught runtime exceptions.
