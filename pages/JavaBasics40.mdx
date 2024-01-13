@@ -261,116 +261,86 @@ clone has the default behavior, super.clone(); because the members of the parent
 
 ## 21. What are the characteristics of object-oriented
 
-Computer software systems are the mapping of real-life business on the computer, and real-life business is actually a process of object collaboration. Object-oriented programming is to organize and write program code according to objects in the same way as real business, so that the computer system can recognize and understand the program code organized and written in object mode, so that the business objects in real life can be mapped into the computer system.
+(Original text summarized by ChatGPT)
 
-Object-oriented programming languages ​​have four main characteristics: encapsulation, inheritance, abstraction, and polymorphism.
+The features of object-oriented programming can be summarized as follows:
 
-1) Encapsulation:
+**Encapsulation**: Encapsulation involves organizing code into objects, where each object encapsulates its own data (attributes) and behavior (methods). It promotes high cohesion and loose coupling by hiding internal implementation details and providing a well-defined interface for interacting with the object.
 
-Encapsulation is the basis for ensuring that software components have excellent modularity. The goal of encapsulation is to achieve "high cohesion and low coupling" of software components and prevent the impact of changes caused by program interdependence. In object-oriented programming languages, objects are the most basic unit of encapsulation. Object-oriented encapsulation is clearer and more powerful than encapsulation in traditional languages. Object-oriented encapsulation is to encapsulate the code describing the properties and behavior of an object in a "module", that is, a class. The properties are defined with variables, and the behavior is defined with methods. Methods can directly access the properties in the same object. . Under normal circumstances, just remember to put the variable and the method to access the variable together, and define all member variables in a class as private. Only the class's own methods can access these member variables. This is basically By implementing the encapsulation of objects, it is easy to find out the methods to be assigned to this class, which is basically object-oriented programming. Grasp one principle: put methods and related methods that operate on the same thing in the same class, and put methods and the data they operate on in the same class.
+**Inheritance**: Inheritance allows a class to inherit properties and behavior from another class. It enables code reuse and promotes hierarchical relationships among classes. Subclasses can extend and specialize the functionality of the superclass while maintaining a common interface.
 
-For example, if a person wants to draw a circle on the blackboard, this involves a total of three objects: the person, the blackboard, and the circle. Which object should the method of drawing a circle be assigned to? Since drawing a circle requires the use of the center and radius, the center and radius are obviously attributes of the circle. If they are defined as private member variables in the class, then the method of drawing a circle must be assigned to the circle before it can access the center and radius. For these two attributes of radius, people will only call the circle drawing method of the circle to send messages to the circle. The circle drawing method should not be allocated to the object of the person. This is object-oriented encapsulation, that is, the object is encapsulated into a A highly autonomous and relatively closed individual, the object state (properties) is read and changed by the object's own behavior (methods). A more easy-to-understand example is that the driver brakes the train. Should the braking action be assigned to the driver or to the train? Obviously, it should be assigned to the train, because the driver himself cannot have that much strength to brake a train. To stop, only the train itself can complete this action. The train needs to use multiple internal components such as clutches and brake pads to cooperate to complete the braking action. The driver's braking process only sends a message to the train, notifying the train to perform braking. Just an action.
+**Abstraction**: Abstraction involves identifying common characteristics and behaviors among objects and creating a generalized class to represent them. It focuses on essential features while hiding unnecessary details. Abstraction allows for the creation of reusable and modular code.
 
-2) Inheritance:
+**Polymorphism**: Polymorphism allows objects of different classes to be treated as objects of a common superclass. It enables the use of a single interface to represent multiple types of objects. Polymorphism allows code to be written in a more generic and flexible manner, supporting dynamic method dispatch and runtime binding.
 
-When defining and implementing a class, you can do it on the basis of an existing class. You can use the content defined by the existing class as your own content, and you can add some new content or modify the original method. Making it more suitable for special needs is called inheritance. Inheritance is a mechanism for subclasses to automatically share parent class data and methods. This is a relationship between classes that improves the reusability and scalability of software.
+These features collectively enable object-oriented programming languages to model real-world systems by representing entities as objects and facilitating their interaction and collaboration.
 
-3) Abstraction:
-
-Abstraction is to find out the similarities and commonalities of some things, and then classify these things into a class. This class only considers the similarities and commonalities of these things, and ignores those aspects that are irrelevant to the current topic and goal. Focus on aspects related to current goals. For example, if you see an ant and an elephant and you can imagine how they are similar, that is abstraction. Abstraction includes two aspects: behavioral abstraction and state abstraction. For example, define a Person class as follows:
-```java
-class Person{
-
-String name;
-
-int age;
-
-}
-```
-
-People are inherently complex things with many aspects, but because the current system only needs to know the person's name and age, the class defined above only contains the two attributes of name and age. This is a kind of abstraction. Using abstraction You can avoid thinking about details that are irrelevant to your goals. My understanding of abstraction is not to use a microscope to look at all aspects of a thing, which would involve too much content, but to be good at dividing the boundaries of the problem, and only consider what the current system needs.
-
-4) Polymorphism:
-
-Polymorphism means that the specific type pointed to by the reference variable defined in the program and the method calls issued through the reference variable are not determined during programming, but are determined during the running of the program, that is, which class a reference variable will point to. Instance object, the method call issued by the reference variable is a method implemented in which class, it must be determined during the running of the program. Because the specific class is determined only when the program is running, the reference variable can be bound to various class implementations without modifying the source program code, causing the specific method called by the reference to change accordingly, that is, it does not need to be modified. The program code can change the specific code bound to the program when it is running, allowing the program to select multiple running states. This is polymorphism. Polymorphism enhances software flexibility and scalability. For example, UserDao in the following code is an interface. It defines that the instance object pointed to by the reference variable userDao is returned by daofactory.getDao() during execution. Sometimes it points to the implementation of UserJdbcDao, and sometimes it points to the implementation of UserHibernateDao. In this way, without modifying the source code, you can change the specific class implementation pointed by userDao, which will cause the specific code called by userDao.insertUser() method to also change, that is, sometimes the insertUser method of UserJdbcDao is called, and sometimes it is called UserHibernateDao's insertUser method:
-
-UserDao userDao = daofactory.getDao();
-
-userDao.insertUser(user);
-
-Metaphor: When a person eats, do you see the left hand or the right hand?
-
-## 22.What is the mechanism to implement polymorphism in java?
+## 22. What is the mechanism to implement polymorphism in java?
 
 It relies on the fact that the reference variables defined by the parent class or interface can point to the instance object of the subclass or specific implementation class, and the method called by the program is dynamically bound at runtime, which is the method of the specific instance object pointed by the reference variable, that is Methods of the object running in memory, not methods defined in the type of the reference variable.
 
-## 23.What is the difference between abstract class and interface?
+## 23. What are the differences between abstract classes and interfaces?
 
-A class containing the abstract modifier is an abstract class, and an abstract class cannot create instance objects. Classes containing abstract methods must be defined as abstract class, and methods in abstract class classes do not have to be abstract. Abstract methods defined in an abstract class must be implemented in a concrete subclass, so there cannot be abstract constructors or abstract static methods. If the subclass does not implement all abstract methods in the abstract parent class, then the subclass must also be defined as abstract type.
+An abstract class is a class that contains the `abstract` keyword in its declaration. Abstract classes cannot be instantiated, meaning you cannot create objects of an abstract class. A class with abstract methods must be declared as an abstract class, but an abstract class can also have non-abstract methods. Abstract methods defined in an abstract class must be implemented in concrete subclasses, so abstract classes cannot have abstract constructors or static methods. If a subclass does not implement all the abstract methods from the abstract parent class, it must also be declared as abstract.
 
-An interface can be said to be a special case of an abstract class, and all methods in the interface must be abstract. The method definitions in the interface default to public abstract type, and the member variable types in the interface default to public static final.
+An interface can be seen as a special case of an abstract class, where all methods are abstract. All methods in an interface are implicitly public and abstract, and all member variables are implicitly public, static, and final.
 
-Let’s compare the grammatical differences between the two:
+Here are the syntax differences between abstract classes and interfaces:
 
-1) Abstract classes can have constructors, but interfaces cannot have constructors.
+1) Abstract classes can have constructors, while interfaces cannot.
 
-2) There can be ordinary member variables in abstract classes, but there are no ordinary member variables in interfaces.
+2) Abstract classes can have regular member variables, but interfaces cannot.
 
-3) Abstract classes can contain non-abstract ordinary methods. All methods in the interface must be abstract, and there cannot be non-abstract ordinary methods.
+3) Abstract classes can contain non-abstract methods, but all methods in an interface must be abstract and cannot have a method body.
 
-4) The access type of abstract methods in abstract classes can be public, protected and (default type, although
+4) The access modifiers for abstract methods in an abstract class can be public, protected, or default (package-private), although default is not recommended. However, methods in an interface are always implicitly public and abstract.
 
-No error is reported under eclipse, but it should not work), but the abstract method in the interface can only be of public type, and the default is public abstract type.
+5) Abstract classes can have static methods, but interfaces cannot.
 
-5) Abstract classes can contain static methods, but interfaces cannot contain static methods.
+6) Both abstract classes and interfaces can have static member variables. In an abstract class, the access modifiers for static member variables can be any, but in an interface, they are always implicitly public, static, and final.
 
-6) Both abstract classes and interfaces can contain static member variables. The access types of static member variables in abstract classes can be arbitrary, but variables defined in interfaces can only be of public static final type, and the default is public static final type.
+7) A class can implement multiple interfaces, but it can only inherit from one abstract class.
 
-7) A class can implement multiple interfaces, but can only inherit one abstract class.
+Now let's discuss the practical differences between the two:
 
-
-
-Let’s talk about the differences between the two in application:
-
-Interfaces play more of a role in system architecture design methods and are mainly used to define communication contracts between modules. Abstract classes play a role in code implementation and can realize code reuse. For example, the template method design pattern is a typical application of abstract classes. It is assumed that all Servlet classes in a project must use the same method to determine permissions and record access. Log and handle exceptions, then you can define an abstract base class so that all Servlets inherit this abstract base class. In the service method of the abstract base class, permission judgment, access log recording and exception handling code are completed. The classes only complete their respective business logic codes. The pseudo code is as follows:
+Interfaces are more commonly used in system architecture design to define communication contracts between modules. On the other hand, abstract classes are more focused on code implementation and can facilitate code reuse. For example, the template method design pattern is a typical application of abstract classes. Suppose a project has multiple servlet classes that need to perform the same authorization checks, logging, and exception handling. In this case, you can define an abstract base class that all servlets inherit from, and the base class's service method can handle the common code for authorization, logging, and exception handling. Each subclass only needs to implement its own specific business logic. Here's a pseudocode example:
 
 ```java
 public abstract class BaseServlet extends HttpServlet {
 
     public final void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        //Record access logs and perform permission judgment
-        if (has permission) {
+        // Perform logging and authorization
+        if (hasPermission()) {
             try {
                 doService(request, response);
             } catch (Exception e) {
-                // todo: record exception information
+                // Handle exceptions and log error information
             }
         }
     }
 
-    protected abstract void doService(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        //Note that the access permission is defined as protected, which looks professional and rigorous because it is specially used for subclasses.
-    }
+    protected abstract void doService(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException;
 }
 ```
 
 ```java
 public class MyServlet1 extends BaseServlet {
-    protected void doService(HttpServletRequest request, HttpServletResponse response) throws IOExcetion, ServletException {
-        // This Servlet only handles specific business logic code
+    protected void doService(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        // Implement specific business logic for this servlet
     }
 }
 ```
-A certain section of code in the middle of the parent class method is uncertain and is left to the subclass, so the template method is used to design the pattern.
-Note: The idea of ​​this question is to first explain the basic concepts of abstract classes and interfaces in general, then compare the grammatical details of the two, and finally talk about the application differences between the two. The method for comparing the differences in grammatical details between the two is: first compare and answer one by one from six aspects such as constructors, ordinary member variables and methods (including abstract methods), static variables and methods, and inheritance in a class, and then start from the third Answer from the perspective of inheritance, especially at the end using a typical example to show my profound technical skills.
 
+The template method pattern allows the intermediate code in the parent class to be left undefined and delegated to the subclasses, making use of code reuse. It's worth noting that the access modifier for the abstract method in the parent class is defined as protected to indicate that it is meant to be used by subclasses.
+
+In summary, interfaces are primarily used for defining communication contracts between modules, while abstract classes are more focused on code implementation and reuse.
 ## 24. Can the abstract method be static, native, and synchronized at the same time?
 
 Abstract methods cannot be static, because abstract methods must be implemented by subclasses, and static has nothing to do with subclasses!
 
 The native method means that the method is to be implemented in another platform-dependent programming language. There is no problem of being implemented by a subclass. Therefore, it cannot be abstract and cannot be mixed with abstract. For example, the FileOutputSteam class needs to deal with hardware, and the underlying implementation uses operating system-related api implementation. For example, it is implemented in C language in Windows. Therefore, looking at the source code of jdk, you can find that the open method of FileOutputStream is defined as follows:
 
-private native void open(String name) throws FileNotFoundException;
+`private native void open(String name) throws FileNotFoundException;`
 
 If we want to use Java to call a C language function written by others, we cannot call it directly. We need to write a C language function according to the requirements of Java, and then our C language function calls someone else's C language function. Since our C language function is written according to the requirements of Java, our C language function can be connected to Java. The docking method on the Java side is to define the method corresponding to our C function. The corresponding method in Java The method does not need to write specific code, but it needs to be declared native in front.
 
