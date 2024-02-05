@@ -581,10 +581,10 @@ public class Test {
         }
     }
 }
-```
----------Results of the---------
 
-1
+// ----------Output----------
+// 1
+```
 
 The running result is 1, why? The process of the main function calling the sub-function and getting the result is like the main function preparing an empty jar. When the sub-function wants to return the result, it first puts the result in the jar, and then returns the program logic to the main function. The so-called return means that the sub-function says, "I won't run it anymore. Let your main function continue to run. There is no result at all. The result is put into the jar before saying this."
 
@@ -640,25 +640,25 @@ public class Test {
         return 2;
     }
 }
+
+// ----------Output----------
+// func1
+// func2
+// 2
 ```
------------Results of the-----------------
-func1
 
-func2
-
-2
 
 Conclusion: The code in finally is executed after the return and break statements.
 
-## 39.The difference between final, finally and finalize.
+## 39. The difference between final, finally and finalize.
 
-final is used to declare properties, methods and classes, which respectively means that properties are immutable, methods cannot be overridden, and classes cannot be inherited.
+`final` is used to declare properties, methods and classes, which respectively means that properties are immutable, methods cannot be overridden, and classes cannot be inherited.
 
 For inner classes to access local variables, local variables must be defined as final type.
 
-Finally is part of the exception handling statement structure, indicating that it is always executed.
+`finally` is part of the exception handling statement structure, indicating that it is always executed.
 
-finalize is a method of the Object class. This method of the recycled object will be called when the garbage collector is executed. This method can be overridden to provide other resource recycling during garbage collection, such as closing files, etc. The JVM does not guarantee that this method will always be called
+`finalize` is a method of the Object class. This method of the recycled object will be called when the garbage collector is executed. This method can be overridden to provide other resource recycling during garbage collection, such as closing files, etc. The JVM does not guarantee that this method will always be called
 
 ## 40. What are the similarities and differences between runtime exceptions and general exceptions?
 
