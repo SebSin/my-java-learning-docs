@@ -1,10 +1,6 @@
 # Java Basic 80 Interview Questions (41 - 80)
 
-## 40. What are the similarities and differences between runtime exceptions and general exceptions?
-
-Exceptions represent abnormal conditions that may occur during program running. Runtime exceptions represent abnormalities that may be encountered in the normal operation of a virtual machine and are a common operating error. The Java compiler requires that methods must be declared to throw non-runtime exceptions that may occur, but it is not required to be declared to throw uncaught runtime exceptions.
-
-## 41.What is the difference between error and exception?
+## 41. What is the difference between error and exception?
 
 error represents a serious problem in a situation where recovery is not impossible but difficult. For example, memory overflow. It is impossible to expect a program to handle such a situation. exception represents a design or implementation problem. That is, it represents a situation that would never occur if the program were running normally.
 
@@ -233,79 +229,90 @@ public class ThreadTest {
 The following program uses internal classes to implement threads, and does not consider the order when increasing or decreasing j.
 
 ```java
-public class ThreadTest1
-{
-private int j;
-public static void main(String[] args){
-    ThreadTest1 tt=new ThreadTest1();
-    Inc inc=tt.new Inc();
-    Dec dec=tt.new Dec();
-    for(int i=0;i<2;i++){
-        Thread t=new Thread(inc);
-        t.start();
-        t=new Thread(dec);
-        t.start();
+public class ThreadTest1 {
+    private int j;
+
+    public static void main(String[] args) {
+        ThreadTest1 tt = new ThreadTest1();
+        Inc inc = tt.new Inc();
+        Dec dec = tt.new Dec();
+        for (int i = 0; i < 2; i++) {
+            Thread t = new Thread(inc);
+            t.start();
+            t = new Thread(dec);
+            t.start();
         }
     }
-private synchronized void inc(){
-    j++;
-    System.out.println(Thread.currentThread().getName()+"-inc:"+j);
+
+    private synchronized void inc() {
+        j++;
+        System.out.println(Thread.currentThread().getName() + "-inc:" + j);
     }
-private synchronized void dec(){
-    j--;
-    System.out.println(Thread.currentThread().getName()+"-dec:"+j);
+
+    private synchronized void dec() {
+        j--;
+        System.out.println(Thread.currentThread().getName() + "-dec:" + j);
     }
-class Inc implements Runnable{
-    public void run(){
-        for(int i=0;i<100;i++){
-        inc();
+
+    class Inc implements Runnable {
+        public void run() {
+            for (int i = 0; i < 100; i++) {
+                inc();
+            }
         }
     }
-}
-class Dec implements Runnable{
-    public void run(){
-        for(int i=0;i<100;i++){
-        dec();
+
+    class Dec implements Runnable {
+        public void run() {
+            for (int i = 0; i < 100; i++) {
+                dec();
+            }
         }
     }
-}
 }
 ```
 ----------Just another random one-------------
 
 ```java
-class A
-{
-JManger j =new JManager();
-main()
-{
-	new A().call();
+class A {
+    JManager j = new JManager();
+
+    void main() {
+        new A().call();
+    }
+
+    void call() {
+        for (int i = 0; i < 2; i++) {
+            new Thread(
+                    new Runnable() {
+                        public void run() {
+                            while (true) {
+                                j.accumulate();
+                            }
+                        }
+                    }
+            ).start();
+            new Thread(new Runnable() {
+                public void run() {
+                    while (true) {
+                        j.subtract();
+                    }
+                }
+            }).start();
+        }
+    }
 }
-void call()
-{
-	for(int i=0;i<2;i++)
-	{
-		new Thread(
-			new Runnable(){ public void run(){while(true){j.accumulate();}}}
-		).start();
-		new Thread(new Runnable(){ public void run(){while(true){j.sub();}}}).start();
-	}
-}
-}
-classJManager
-{
-	private int j = 0;
-	
-	public synchronized void subtract()
-	{
-		j--;
-	}
-	
-	public synchronized void accumulate()
-	{
-		j++;
-	}
-	
+
+class JManager {
+    private int j = 0;
+
+    public synchronized void subtract() {
+        j--;
+    }
+
+    public synchronized void accumulate() {
+        j++;
+    }
 }
 ```
 ## 53. The sub-thread loops 10 times, then the main thread loops 100 times, then returns to the sub-thread to loop 10 times, then returns to the main thread and loops 100 times, and so on 50 times, please write the program.
@@ -315,70 +322,62 @@ The final program code is as follows:
 ```java
 public class ThreadTest {
 
-	public static void main(String[] args) {
-		new ThreadTest().init();
-	}
-	public void init()
-	{
-		final Business business = new Business();
-		new Thread(
-				new Runnable()
-				{
-					public void run() {
-						for(int i=0;i<50;i++)
-						{
-							business.SubThread(i);
-						}						
-					}
-					
-				}
-		
-		).start();
-		for(int i=0;i<50;i++)
-		{
-			business.MainThread(i);
-		}		
-	}
-	
-	private class business
-	{
-		boolean bShouldSub = true; //This is equivalent to defining a semaphore that controls who should execute
-		public synchronized void MainThread(int i)
-		{
-			if(bShouldSub)
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}		
-				
-			for(int j=0;j<5;j++)
-			{
-				System.out.println(Thread.currentThread().getName() + ":i=" + i +",j=" + j);
-			}
-			bShouldSub = true;
-			this.notify();
-		
-		}
-		
-		public synchronized void SubThread(int i)
-		{
-			if(!bShouldSub)
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
-				
-			for(int j=0;j<10;j++)
-			{
-				System.out.println(Thread.currentThread().getName() + ":i=" + i +",j=" + j);
-			}
-			bShouldSub = false;				
-			this.notify();			
-		}
-	}
+    public static void main(String[] args) {
+        new ThreadTest().init();
+    }
+
+    public void init() {
+        final Business business = new Business();
+        new Thread(
+                new Runnable() {
+                    public void run() {
+                        for (int i = 0; i < 50; i++) {
+                            business.SubThread(i);
+                        }
+                    }
+
+                }
+
+        ).start();
+        for (int i = 0; i < 50; i++) {
+            business.MainThread(i);
+        }
+    }
+
+    private class Business {
+        boolean bShouldSub = true; //This is equivalent to defining a semaphore that controls who should execute
+
+        public synchronized void MainThread(int i) {
+            if (bShouldSub)
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            for (int j = 0; j < 5; j++) {
+                System.out.println(Thread.currentThread().getName() + ":i=" + i + ",j=" + j);
+            }
+            bShouldSub = true;
+            this.notify();
+
+        }
+
+        public synchronized void SubThread(int i) {
+            if (!bShouldSub)
+                try {
+                    this.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            for (int j = 0; j < 10; j++) {
+                System.out.println(Thread.currentThread().getName() + ":i=" + i + ",j=" + j);
+            }
+            bShouldSub = false;
+            this.notify();
+        }
+    }
 }
 ```
 Note: It is impossible to write the complete code above at the beginning. The initially written code is as follows. The problem is that the codes of the two threads need to refer to the same variable, that is, the codes of the two threads need to share data. Therefore, the two threads need to share data. The execution code of each thread is moved to the same class:
@@ -525,11 +524,11 @@ public class ThreadTest
 	}
 }
 ```
-## 54.What interface should be implemented to implement comparison in Collection framework?
+## 54. What interface should be implemented to implement comparison in Collection framework?
 
 comparable/comparator
 
-## 55.The difference between ArrayList and Vector
+## 55. The difference between ArrayList and Vector
 
 Both classes implement the List interface (the List interface inherits the Collection interface). They are both ordered collections, that is, the positions of the elements stored in these two collections are in order, which is equivalent to a dynamic array. , we can retrieve an element according to the position index number in the future, and the data in it is allowed to be repeated. This is the biggest difference between collections such as HashSet. Collections such as HashSet cannot retrieve elements by index number. , and no duplicate elements are allowed (the original question has nothing to do with hashset, but in order to clarify the functions of ArrayList and Vector, we use a comparison method, which is more conducive to explaining the problem).
 
@@ -547,7 +546,7 @@ Both ArrayList and Vector have an initial capacity. When the number of elements 
 
 Summary: Vector doubles its original size, and ArrayList increases its original size by 0.5 times.
 
-## 56.The difference between HashMap and Hashtable
+## 56. The difference between HashMap and Hashtable
 
 HashMap is a lightweight implementation of Hashtable (non-thread-safe implementation). They both complete the Map interface. The main difference is that HashMap allows empty (null) key values ​​(key). Due to non-thread safety, in the case of only one thread access , the efficiency is higher than Hashtable.
 
@@ -567,11 +566,11 @@ As for HashMap and HashTable, there are three main aspects:
 
 3) Value: Only HashMap allows you to use null values ​​as the key or value of a table entry
 
-## 57.What is the difference between List and Map?
+## 57. What is the difference between List and Map?
 
 One is a collection that stores single-column data, and the other is a collection that stores double-column data such as keys and values. The data stored in the List is in order and is allowed to be repeated; the data stored in the Map is not in order, and its keys cannot be Duplicate, its value can be repeated.
 
-## 58.Do List, Set, and Map inherit from Collection interface?
+## 58. Do List, Set, and Map inherit from Collection interface?
 
 List, Set are, Map is not
 
@@ -696,7 +695,7 @@ Commonly used packages: java.lang java.io java.util java.sql,javax.servlet,org.a
 
 Commonly used interfaces: Remote List Map Document NodeList, Servlet, HttpServletRequest, HttpServletResponse, Transaction (Hibernate), Session (Hibernate), HttpSession
 
-## 68.How many types of streams are there in java? JDK provides some abstract classes for each type of stream to inherit. Please tell me which classes they are?
+## 68. How many types of streams are there in java? JDK provides some abstract classes for each type of stream to inherit. Please tell me which classes they are?
 
 Byte stream, character stream.
 
@@ -953,7 +952,7 @@ Method 2: Object.getClass(), for example: "hello".getClass()
 
 Method 3: Class.forName(), for example: Class.forName("java.lang.String")
 
-#80.Java code error checking
+## 80. Java code error checking
 
 1)
 
